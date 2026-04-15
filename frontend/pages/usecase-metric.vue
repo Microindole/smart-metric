@@ -1,16 +1,16 @@
 <template>
   <AppLayout activeKey="usecase">
-    <a-space direction="vertical" style="width: 100%" :size="14">
-      <a-card title="文件上传处（.oom）">
-        <a-space>
+    <div class="page-wrap">
+      <a-card title="文件上传（.oom）" class="panel-card">
+        <div class="upload-row">
           <input type="file" accept=".oom,.xml" @change="onOomSelected" />
           <a-button type="primary" :loading="parseLoading" @click="parseOom">开始分析</a-button>
           <a-button @click="loadSampleFactors">加载默认因子</a-button>
-        </a-space>
-        <div v-if="selectedOomName" style="margin-top: 8px">当前文件：{{ selectedOomName }}</div>
+        </div>
+        <div v-if="selectedOomName" class="file-tip">当前文件：{{ selectedOomName }}</div>
       </a-card>
 
-      <a-card title="UUC 计算">
+      <a-card title="UUC 计算" class="panel-card">
         <a-row :gutter="12">
           <a-col :span="8">
             <div class="field-label">简单用例个数</div>
@@ -28,7 +28,7 @@
         <div class="result-line">UUC = {{ result.uuc }}</div>
       </a-card>
 
-      <a-card title="UAW 计算">
+      <a-card title="UAW 计算" class="panel-card">
         <a-row :gutter="12">
           <a-col :span="8">
             <div class="field-label">简单角色个数</div>
@@ -46,7 +46,7 @@
         <div class="result-line">UAW = {{ result.uaw }}</div>
       </a-card>
 
-      <a-card title="TCF 计算">
+      <a-card title="TCF 计算" class="panel-card">
         <a-table :data-source="tcfFactors" :pagination="false" :columns="factorColumns" row-key="id" size="small">
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'level'">
@@ -57,7 +57,7 @@
         <div class="result-line">TCF = {{ result.tcf }}</div>
       </a-card>
 
-      <a-card title="EF 计算">
+      <a-card title="EF 计算" class="panel-card">
         <a-table :data-source="efFactors" :pagination="false" :columns="factorColumns" row-key="id" size="small">
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'level'">
@@ -68,14 +68,14 @@
         <div class="result-line">EF = {{ result.ef }}</div>
       </a-card>
 
-      <a-card>
+      <a-card class="panel-card final-card">
         <a-space>
           <a-button type="primary" :loading="calcLoading" @click="calculate">计算 UCP</a-button>
           <a-button @click="exportResult">导出 CSV</a-button>
         </a-space>
         <div class="ucp">最终 UCP = {{ result.ucp }}</div>
       </a-card>
-    </a-space>
+    </div>
   </AppLayout>
 </template>
 
@@ -191,18 +191,43 @@ onMounted(loadSampleFactors)
 </script>
 
 <style scoped>
+.page-wrap {
+  display: grid;
+  gap: 14px;
+}
+.panel-card {
+  border-radius: 12px;
+  border: 1px solid #e8edf5;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.file-tip {
+  margin-top: 10px;
+  color: #3d4f68;
+  font-size: 13px;
+}
 .field-label {
-  margin-bottom: 6px;
-  color: #666;
+  margin-bottom: 7px;
+  color: #4f5f75;
   font-size: 12px;
 }
 .result-line {
-  margin-top: 10px;
+  margin-top: 12px;
   font-weight: 600;
+  color: #1f3552;
+}
+.final-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
 }
 .ucp {
-  margin-top: 12px;
-  font-size: 20px;
+  margin-top: 14px;
+  font-size: 24px;
   font-weight: 700;
+  color: #165dff;
 }
 </style>

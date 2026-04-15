@@ -1,0 +1,140 @@
+# 后端 Agent 规约
+
+修改后端代码后，必须回看并更新本文档；如果修改涉及度量模型，还要同步更新 `agents/metrics.md`；如果修改涉及测试，还要同步更新 `agents/testing.md`。
+
+## 不要做的事
+
+- 不要把新业务逻辑直接写进 `backend/app.py`。
+- 不要随意改已有接口返回格式。
+- 不要把上传文件落盘到仓库，除非任务明确要求。
+- 不要引入重依赖，除非有测试和说明。
+
+## 推荐新增后端功能方式
+
+新增核心模块：
+
+```text
+backend/core/<module_name>/
+  __init__.py
+  service.py
+```
+
+新增路由模块：
+
+```text
+backend/routes/<module_routes>.py
+```
+
+在 `backend/app.py` 只做最小注册：
+
+```python
+from routes.<module_routes> import <blueprint>
+app.register_blueprint(<blueprint>)
+```
+
+## API 返回格式
+
+现有后端多数接口使用：
+
+```json
+{
+  "success": true,
+  "data": {}
+}
+```
+
+错误格式：
+
+```json
+{
+  "success": false,
+  "message": "错误说明"
+}
+```
+
+新增接口应保持一致。
+
+## 当前路由模块
+
+```text
+backend/routes/metrics_45.py
+  功能点度量
+  控制流图源码分析
+  控制流图导入
+
+backend/routes/metrics_oo_estimate.py
+  面向对象 CK/LK 度量
+  项目估算
+```
+
+## 当前核心模块
+
+```text
+backend/core/loc_metric/
+backend/core/usecase_metric/
+backend/core/function_point_metric/
+backend/core/cfg_metric/
+backend/core/oo_metric/
+backend/core/estimate_metric/
+backend/core/diagram_parser/
+```
+
+## 多语言控制流设计
+
+控制流图模块采用策略模式：
+
+```text
+backend/core/cfg_metric/strategies/base.py
+backend/core/cfg_metric/strategies/c_style.py
+backend/core/cfg_metric/strategies/python_strategy.py
+backend/core/cfg_metric/strategies/factory.py
+```
+
+新增语言时：
+
+1. 新增 `<language>_strategy.py`。
+2. 实现 `ControlFlowAnalyzer` 接口。
+3. 在 `factory.py` 注册。
+4. 补测试。
+
+不要把所有语言规则继续塞进一个函数。
+
+## 面向对象度量
+
+当前位置：
+
+```text
+backend/core/oo_metric/
+```
+
+当前仅支持 Java 源码。输出 CK 指标：
+
+```text
+WMC
+DIT
+NOC
+CBO
+RFC
+LCOM
+```
+
+LK/规模类指标：
+
+```text
+NOM
+NOA
+class_loc
+avg_method_complexity
+```
+
+后续若升级 ASTParser，保持 `analyze_oo_files(files)` 的输出结构不变。
+
+## 后端测试
+
+运行当前新增模块测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_45_metrics tests.test_oo_estimate_metrics
+```
+
+若新增后端模块，新增对应 `tests/test_*.py`。

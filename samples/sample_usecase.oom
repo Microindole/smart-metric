@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml>
+  <actors>
+    <actor id="A1" name="学生" />
+    <actor id="A2" name="教师" />
+    <actor id="A3" name="教务管理员" />
+  </actors>
+  <usecases>
+    <usecase id="U1" name="提交作业" transactions="4" />
+    <usecase id="U2" name="批改作业" transactions="8" />
+    <usecase id="U3" name="查看成绩" transactions="2" />
+  </usecases>
+  <associations>
+    <association source="A1" target="U1" />
+    <association source="A1" target="U3" />
+    <association source="A2" target="U2" />
+    <association source="A2" target="U3" />
+    <association source="A3" target="U1" />
+  </associations>
+  <includes>
+    <include source="U2" target="U3" />
+  </includes>
+</uml>

@@ -98,3 +98,50 @@ SmartMetric/
 5. 
 
    **综合汇总**：A 同学将各模块结果汇总，计算最终的工作量、成本和开发时间 。
+
+------
+
+## 五、 当前已实现（阶段一）
+
+- 已完成模块：`用例点度量`、`代码行度量`。
+- 用例点度量：支持 `UUC/UAW/TCF/EF/UCP` 计算，支持 `.oom` 上传解析（通用 + 适配器，内置默认适配器）。
+- 代码行度量：支持 `Java/Python/C++`，统计总行、空行、注释行、有效代码行、注释率。
+- 后端 API：
+  - `GET /api/metrics/usecase/default-factors`
+  - `POST /api/metrics/usecase/parse-oom`
+  - `POST /api/metrics/usecase/calculate`
+  - `POST /api/metrics/loc/calculate`
+  - `POST /api/export`
+
+## 六、 快速启动
+
+### 1) 后端（Flask）
+
+在 `backend/` 目录执行：
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+默认地址：`http://127.0.0.1:5000`
+
+### 2) 前端（Nuxt3）
+
+在 `frontend/` 目录执行：
+
+```bash
+npm install
+npm run dev
+```
+
+默认地址：`http://localhost:3000`
+
+### 3) 样例文件
+
+样例位于 `samples/`：
+
+- `sample_usecase.oom`
+- `SampleStudent.java`
+- `sample_script.py`
+- `sample_algo.cpp`

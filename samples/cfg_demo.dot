@@ -1,0 +1,8 @@
+digraph G {
+  start -> input;
+  input -> if1;
+  if1 -> then1;
+  if1 -> else1;
+  then1 -> end;
+  else1 -> end;
+}

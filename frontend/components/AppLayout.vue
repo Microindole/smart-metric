@@ -5,9 +5,10 @@
       <a-menu :selectedKeys="[activeKey]" mode="inline">
         <a-menu-item key="usecase" @click="$router.push('/usecase-metric')">用例点度量</a-menu-item>
         <a-menu-item key="loc" @click="$router.push('/loc-metric')">代码行度量</a-menu-item>
-        <a-menu-item key="fp" disabled>功能点度量(占位)</a-menu-item>
-        <a-menu-item key="oo" disabled>面向对象度量(占位)</a-menu-item>
-        <a-menu-item key="cfg" disabled>控制流图度量(占位)</a-menu-item>
+        <a-menu-item key="fp" @click="$router.push('/function-point')">功能点度量</a-menu-item>
+        <a-menu-item key="oo" @click="$router.push('/oo-metric')">面向对象度量</a-menu-item>
+        <a-menu-item key="cfg" @click="$router.push('/cfg-metric')">控制流图度量</a-menu-item>
+        <a-menu-item key="estimate" @click="$router.push('/estimate-metric')">项目估算</a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

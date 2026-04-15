@@ -9,9 +9,13 @@ from core.loc_metric import analyze_files
 from core.samples import list_samples, read_sample
 from core.usecase_metric.defaults import EF_DEFAULT_FACTORS, TCF_DEFAULT_FACTORS
 from core.usecase_metric.service import calculate_usecase_metrics, parse_oom_and_suggest_counts
+from routes.metrics_45 import metrics_45_bp
+from routes.metrics_oo_estimate import metrics_oo_estimate_bp
 
 app = Flask(__name__)
 CORS(app)
+app.register_blueprint(metrics_45_bp)
+app.register_blueprint(metrics_oo_estimate_bp)
 
 
 def ok(data=None):

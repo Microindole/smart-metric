@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml>
+  <actors>
+    <actor id="A1" name="Student" />
+    <actor id="A2" name="Teacher" />
+    <actor id="A3" name="Admin" />
+  </actors>
+  <usecases>
+    <usecase id="U1" name="SubmitHomework" transactions="4" />
+    <usecase id="U2" name="ReviewHomework" transactions="8" />
+    <usecase id="U3" name="ViewScore" transactions="2" />
+  </usecases>
+  <associations>
+    <association source="A1" target="U1" />
+    <association source="A1" target="U3" />
+    <association source="A2" target="U2" />
+    <association source="A2" target="U3" />
+    <association source="A3" target="U1" />
+  </associations>
+  <includes>
+    <include source="U2" target="U3" />
+  </includes>
+</uml>

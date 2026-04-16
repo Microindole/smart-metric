@@ -1,147 +1,163 @@
-# AI写的实现步骤
+# SmartMetric
 
-建议按照“前后端分离”的架构搭建 **SmartMetric** 自动化度量平台 。这种结构能让 A、B、C 三位同学并行开发，互不干扰 。
+SmartMetric 是一个前后端分离的软件度量自动化工具，用于支撑软件度量课程实验。当前仓库已经覆盖需求/设计/代码阶段的一组核心度量能力，并同时提供 Web 端与 CLI 端入口。
 
-以下是分阶段的框架搭建指南：
+## 当前已实现
 
-------
+- 用例点度量 `UUC / UAW / TCF / EF / UCP`
+- 代码行度量 `LoC`
+- 功能点度量 `FP`
+- 控制流图导入与圈复杂度度量
+- 源码控制流分析（Java / Python / C / C++）
+- 面向对象度量 `CK / LK`
+- 类图级 OO 度量（`.xml` / `.oom`）
+- 项目工作量 / 成本 / 工期 / 人员估算
+- CSV 导出
+- 根目录自动化测试脚本
 
-## 一、 第一步：定义项目目录结构
+## 目录结构
 
-首先在 `SmartMetric` 根目录下创建以下文件夹结构，明确各模块职责：
-
-Plaintext
-
-```
-SmartMetric/
-├── backend/            # 后端代码（Python/Flask），由 B、C 负责 [cite: 101, 223]
-│   ├── core/           # 核心算法模块
-│   │   ├── ast_parser/ # Java AST 解析逻辑 
-│   │   ├── xml_parser/ # UML (XML/OOM) 解析逻辑 [cite: 172, 182]
-│   │   └── metrics.py  # 具体的 LK/CK/LoC 计算逻辑 [cite: 24, 183]
-│   ├── uploads/        # 存放用户上传的待度量文件 
-│   └── app.py          # 后端入口与 API 路由 
-├── frontend/           # 前端代码（Nuxt/Vue），由 A 负责 
-│   ├── pages/          # 页面（功能点、类图、代码度量等页面） 
-│   ├── components/     # 通用组件（文件上传、报表图表） [cite: 95]
-│   └── utils/          # Axios 通信配置 [cite: 95]
-├── docs/               # 项目文档与实验报告，全组协作 [cite: 29, 52]
-└── samples/            # 测试样例（.java, .xml, .oom 文件） 
-```
-
-------
-
-## 二、 第二步：后端骨架搭建（B & C 协作）
-
-后端建议使用 **Flask**，因为它轻量且易于处理文件流 。
-
-1. **环境初始化**： 在 `backend/` 下创建 `requirements.txt`，包含 `flask`, `flask-cors` (跨域), `javalang` (AST 解析) 。
-
-2. **编写入口 `app.py`**： 定义基础的 API 路由，例如 `/api/measure/code` 和 `/api/measure/diagram` 。
-
-   > 
-   >
-   > **核心逻辑构思**：后端接收前端传来的文件或字符串内容，根据文件类型分发给对应的解析模块 。
-   >
-   > 
-   >
-   > 
-
-------
-
-## 三、 第三步：前端骨架搭建（A 负责）
-
-前端建议使用 **Nuxt** 框架配合 **Ant Design Vue** 组件库，实现快速开发 。
-
-1. **初始化项目**： 使用命令初始化 Nuxt 框架，并配置 **Axios** 用于与后端通信 。
-
-2. **设计导航布局**：
-
-   根据实验要求，在顶部或侧边栏设置以下导航项：
-
-   - 
-
-     **代码辅助度量**（LoC、CK/LK 模型） 
-
-   - 
-
-     **设计辅助度量**（用例点、类图分析） 
-
-   - 
-
-     **复杂度度量**（圈复杂度） 
-
-3. **开发通用上传组件**： 创建一个支持上传 `.java` 和 `.xml/.oom` 文件的组件，点击“分析”按钮触发 Axios 请求 。
-
-------
-
-## 四、 第四步：联调与模块实现顺序
-
-建议按照以下优先级逐步填充代码：
-
-1. 
-
-   **基础联调**：A 编写一个上传文件的按钮，B 接收文件并返回“上传成功”的 JSON 信号 。
-
-2. 
-
-   **代码行 (LoC) 模块**：逻辑最简单，适合先行完成以增强信心 。
-
-3. 
-
-   **XML/OOM 解析模块**：C 同学负责利用 `xml.etree` 读取标签，提取类、属性、方法信息 。
-
-4. 
-
-   **AST 解析模块**：B 同学攻克最难的 Java 语法分析，实现变量作用域识别和 LCOM 计算 。
-
-5. 
-
-   **综合汇总**：A 同学将各模块结果汇总，计算最终的工作量、成本和开发时间 。
-
-------
-
-## 五、 当前已实现（阶段一）
-
-- 已完成模块：`用例点度量`、`代码行度量`。
-- 用例点度量：支持 `UUC/UAW/TCF/EF/UCP` 计算，支持 `.oom` 上传解析（通用 + 适配器，内置默认适配器）。
-- 代码行度量：支持 `Java/Python/C++`，统计总行、空行、注释行、有效代码行、注释率。
-- 后端 API：
-  - `GET /api/metrics/usecase/default-factors`
-  - `POST /api/metrics/usecase/parse-oom`
-  - `POST /api/metrics/usecase/calculate`
-  - `POST /api/metrics/loc/calculate`
-  - `POST /api/export`
-
-## 六、 快速启动
-
-### 1) 后端（Flask）
-
-在 `backend/` 目录执行：
-
-```bash
-pip install -r requirements.txt
-python app.py
+```text
+smart-metric/
+├── backend/       Flask 后端、CLI、核心度量模块
+├── frontend/      Nuxt 3 前端页面
+├── samples/       样例输入文件
+├── tests/         Python unittest
+├── scripts/       根目录自动化测试脚本
+├── agents/        面向 agent 的仓库协作规约
+├── docs/          课程文档与报告材料
+└── CONTRIBUTING.md
 ```
 
-默认地址：`http://127.0.0.1:5000`
+## 快速启动
 
-### 2) 前端（Nuxt3）
+### 1. 后端 Web 服务
 
-在 `frontend/` 目录执行：
+```powershell
+cd D:\works\smart-metric
+.\.venv\Scripts\Activate.ps1
+python backend\app.py
+```
 
-```bash
+默认地址：
+
+```text
+http://127.0.0.1:5000
+```
+
+### 2. 前端
+
+```powershell
+cd D:\works\smart-metric\frontend
 npm install
 npm run dev
 ```
 
-默认地址：`http://localhost:3000`
+默认地址：
 
-### 3) 样例文件
+```text
+http://127.0.0.1:3000
+```
 
-样例位于 `samples/`：
+### 3. CLI 入口
+
+查看帮助：
+
+```powershell
+cd D:\works\smart-metric
+.\.venv\Scripts\Activate.ps1
+python backend\cli.py --help
+```
+
+统一测试入口：
+
+```powershell
+python backend\cli.py test backend --suite all --start-server
+```
+
+按路径自动识别并度量：
+
+```powershell
+python backend\cli.py test path samples\class_diagram_demo.xml
+python backend\cli.py test path samples\cfg_demo.json
+python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
+```
+
+通过 CLI 启动后端：
+
+```powershell
+python backend\cli.py serve --host 127.0.0.1 --port 5000
+```
+
+CLI 计算示例：
+
+```powershell
+python backend\cli.py oo-source samples\oo_demo.java
+python backend\cli.py oo-diagram samples\class_diagram_demo.xml
+python backend\cli.py cfg-graph samples\cfg_demo.json
+```
+
+## 自动化测试
+
+统一入口：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_backend_tests.py --suite all --start-server
+```
+
+常用命令：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_backend_tests.py --suite unit
+.\.venv\Scripts\python.exe scripts\run_backend_tests.py --suite smoke --start-server
+```
+
+说明见：
+
+```text
+scripts/README.md
+```
+
+## 核心接口
+
+- `GET /api/health`
+- `GET /api/metrics/usecase/default-factors`
+- `POST /api/metrics/usecase/parse-oom`
+- `POST /api/metrics/usecase/calculate`
+- `POST /api/metrics/loc/calculate`
+- `GET /api/metrics/function-point/defaults`
+- `POST /api/metrics/function-point/calculate`
+- `POST /api/metrics/cfg/calculate`
+- `POST /api/metrics/cfg/import-graph`
+- `POST /api/metrics/oo/calculate`
+- `POST /api/metrics/oo/diagram-calculate`
+- `POST /api/metrics/estimate/calculate`
+- `POST /api/export`
+
+## 样例文件
+
+样例位于 `samples/`，当前主要包括：
 
 - `sample_usecase.oom`
 - `SampleStudent.java`
 - `sample_script.py`
 - `sample_algo.cpp`
+- `oo_demo.java`
+- `class_diagram_demo.xml`
+- `cfg_demo.json`
+- `cfg_demo.mmd`
+- `cfg_demo.dot`
+
+## 协作与提交
+
+请先阅读：
+
+```text
+CONTRIBUTING.md
+```
+
+如果是 agent 接手仓库，还要先读：
+
+```text
+AGENTS.md
+```

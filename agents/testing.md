@@ -10,6 +10,27 @@
 .\.venv\Scripts\python.exe -m unittest tests.test_45_metrics tests.test_oo_estimate_metrics
 ```
 
+统一自动化入口：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_backend_tests.py --suite all --start-server
+.\.venv\Scripts\python.exe backend\cli.py test backend --suite all --start-server
+```
+
+脚本位置：
+
+```text
+scripts/run_backend_tests.py
+scripts/backend_smoke.py
+```
+
+`tests.test_45_metrics` 包含 Java/Python 控制流 AST 策略断言：
+
+```text
+Java   -> ast-java-javalang
+Python -> ast-python
+```
+
 如果 `.venv` 不存在：
 
 ```powershell
@@ -46,9 +67,31 @@ samples/SampleStudent.java
 samples/sample_script.py
 samples/sample_algo.cpp
 samples/oo_demo.java
+samples/class_diagram_demo.xml
 samples/cfg_demo.json
 samples/cfg_demo.mmd
 samples/cfg_demo.dot
+```
+
+CLI 验证示例：
+
+```powershell
+python backend/cli.py --help
+python backend/cli.py --lang en --help
+python backend/cli.py serve --host 127.0.0.1 --port 5000
+python backend/cli.py oo-source samples/oo_demo.java
+python backend/cli.py oo-diagram samples/class_diagram_demo.xml
+python backend/cli.py cfg-graph samples/cfg_demo.json
+```
+
+自动化测试脚本示例：
+
+```powershell
+python scripts/run_backend_tests.py --suite unit
+python scripts/run_backend_tests.py --suite smoke --start-server
+python scripts/run_backend_tests.py --suite all --start-server
+python backend/cli.py test backend --suite unit
+python backend/cli.py test path samples/class_diagram_demo.xml
 ```
 
 ## 接口手动验证

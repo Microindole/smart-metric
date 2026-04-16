@@ -64,8 +64,17 @@ backend/routes/metrics_45.py
 
 backend/routes/metrics_oo_estimate.py
   面向对象 CK/LK 度量
+  类图级 OO 度量
   项目估算
 ```
+
+后端依赖中包含：
+
+```text
+javalang
+```
+
+用途：Java 控制流图 AST 策略。
 
 ## 当前核心模块
 
@@ -77,6 +86,37 @@ backend/core/cfg_metric/
 backend/core/oo_metric/
 backend/core/estimate_metric/
 backend/core/diagram_parser/
+backend/core/class_diagram_metric/
+```
+
+CLI 入口：
+
+```text
+backend/cli.py
+backend/cli_app/
+```
+
+CLI 不替代 Web，但属于正式入口之一。新增度量模块时，如果输入适合文件/JSON 调用，应评估是否补 CLI 子命令。
+
+当前 CLI 同时支持后端启动：
+
+```powershell
+python backend\cli.py serve --host 127.0.0.1 --port 5000
+```
+
+并支持统一测试入口：
+
+```powershell
+python backend\cli.py test backend --suite all --start-server
+python backend\cli.py test path <文件路径> [--metric ...]
+```
+
+CLI 设计要求：
+
+```text
+命令模式：backend/cli_app/commands/*.py
+帮助资源外置：backend/cli_app/i18n/*.json
+命令逻辑复用：backend/core/*
 ```
 
 ## 多语言控制流设计
@@ -128,6 +168,12 @@ avg_method_complexity
 ```
 
 后续若升级 ASTParser，保持 `analyze_oo_files(files)` 的输出结构不变。
+
+类图级 OO 度量位置：
+
+```text
+backend/core/class_diagram_metric/
+```
 
 ## 后端测试
 

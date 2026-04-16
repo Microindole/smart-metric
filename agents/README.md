@@ -66,6 +66,8 @@ SmartMetric 是前后端分离的软件度量自动化工具。
 面向对象 CK/LK
 项目工作量/成本/工期/人员估算
 CSV 导出
+CLI 调用入口
+根目录 scripts 自动化测试
 ```
 
 技术栈：
@@ -145,6 +147,27 @@ npm run dev
 
 若 Nuxt 卡住，优先读 `agents/frontend.md` 的故障处理，不要反复跑 `npm run build`。
 
+CLI：
+
+```powershell
+cd D:\works\smart-metric
+.\.venv\Scripts\Activate.ps1
+python backend\cli.py --help
+```
+
+CLI 启动后端：
+
+```powershell
+python backend\cli.py serve --host 127.0.0.1 --port 5000
+```
+
+统一 CLI 测试：
+
+```powershell
+python backend\cli.py test backend --suite all --start-server
+python backend\cli.py test path samples\class_diagram_demo.xml
+```
+
 ## 开发原则
 
 - 小步修改。
@@ -168,6 +191,7 @@ CFG/圈复杂度         backend/core/cfg_metric/
 CK/LK               backend/core/oo_metric/
 估算                backend/core/estimate_metric/
 UML/OOM 解析         backend/core/diagram_parser/
+类图级 OO            backend/core/class_diagram_metric/
 ```
 
 ## 关于 AST

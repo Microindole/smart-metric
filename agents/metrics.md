@@ -91,9 +91,12 @@ frontend/pages/cfg-metric.vue
 
 ```text
 策略模式
-CStyleAnalyzer -> Java/C/C++
-PythonAnalyzer -> Python
+JavaAstAnalyzer   -> Java，基于 javalang
+PythonAstAnalyzer -> Python，基于标准库 ast
+CStyleAnalyzer    -> C/C++，规则分析
 ```
+
+Java/Python AST 解析失败时会 fallback 到规则策略，接口不直接崩溃。
 
 如果用户要求 AI 识别图片流程图，不要默认接入 AI。当前支持的是结构化图：
 
@@ -136,6 +139,30 @@ Java 源码
 轻量类结构分析
 ```
 
+另外已支持类图级 OO 度量：
+
+```text
+backend/core/class_diagram_metric/
+```
+
+输入：
+
+```text
+.xml
+.oom
+```
+
+输出：
+
+```text
+类图级 DIT
+NOC
+CBO
+NOM
+NOA
+关系数
+```
+
 升级方向：
 
 ```text
@@ -169,4 +196,27 @@ frontend/pages/estimate-metric.vue
 FP
 UCP
 LoC
+```
+
+## CLI
+
+CLI 入口：
+
+```text
+backend/cli.py
+backend/cli_app/
+```
+
+当前子命令：
+
+```text
+serve
+test backend
+test path
+oo-source
+oo-diagram
+fp
+cfg-source
+cfg-graph
+estimate
 ```

@@ -51,6 +51,28 @@ class Cfg45Tests(unittest.TestCase):
         self.assertEqual(result["summary"]["file_count"], 4)
         self.assertGreaterEqual(result["summary"]["max_complexity"], 2)
 
+    def test_cfg_uses_ast_for_java_and_python(self):
+        files = [
+            {
+                "filename": "Demo.java",
+                "content": b"class Demo { int f(int x) { if (x > 0 && x < 10) return x; return x > 10 ? x : 0; } }",
+            },
+            {
+                "filename": "demo.py",
+                "content": b"def f(x):\n    if x > 0 and x < 10:\n        return x\n    return x if x > 10 else 0\n",
+            },
+        ]
+
+        result = analyze_cfg_files(files)
+        by_language = {item["language"]: item for item in result["files"]}
+
+        self.assertEqual(by_language["java"]["analysis_method"], "ast-java-javalang")
+        self.assertEqual(by_language["python"]["analysis_method"], "ast-python")
+        self.assertEqual(by_language["java"]["summary"]["if"], 1)
+        self.assertEqual(by_language["python"]["summary"]["if"], 1)
+        self.assertGreaterEqual(by_language["java"]["cyclomatic_complexity"], 4)
+        self.assertGreaterEqual(by_language["python"]["cyclomatic_complexity"], 4)
+
     def test_imports_json_graph(self):
         content = b'{"nodes":["start","if1","end"],"edges":[["start","if1"],["if1","end"]]}'
         result = analyze_imported_graph(content, "demo.json")

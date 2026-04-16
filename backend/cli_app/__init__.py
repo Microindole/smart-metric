@@ -1,0 +1,1 @@
+"""SmartMetric CLI package."""

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from flask import Blueprint, jsonify, request
 
+from core.class_diagram_metric import analyze_class_diagram_bytes
 from core.estimate_metric import calculate_estimate
 from core.oo_metric import analyze_oo_files
 
@@ -36,6 +37,18 @@ def estimate_calculate():
     try:
         payload = request.get_json(silent=True) or {}
         result = calculate_estimate(payload)
+        return ok(result)
+    except Exception as exc:
+        return fail(str(exc), 422)
+
+
+@metrics_oo_estimate_bp.post("/api/metrics/oo/diagram-calculate")
+def oo_diagram_calculate():
+    try:
+        upload_file = request.files.get("file")
+        if not upload_file:
+            return fail("请上传类图文件")
+        result = analyze_class_diagram_bytes(upload_file.filename, upload_file.read())
         return ok(result)
     except Exception as exc:
         return fail(str(exc), 422)

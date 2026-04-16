@@ -50,6 +50,10 @@
         </a-row>
         <div class="recommend">建议人数：{{ result.recommended_people }}</div>
       </a-card>
+
+      <a-card title="CLI 用法">
+        <pre class="cli-box">python backend/cli.py estimate estimate-input.json</pre>
+      </a-card>
     </a-space>
   </AppLayout>
 </template>
@@ -108,5 +112,12 @@ const calculate = async () => {
 .recommend {
   margin-top: 14px;
   font-weight: 700;
+}
+.cli-box {
+  white-space: pre-wrap;
+  background: #111827;
+  color: #d1fae5;
+  padding: 12px;
+  border-radius: 6px;
 }
 </style>

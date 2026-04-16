@@ -1,0 +1,17 @@
+<model>
+  <class id="Base" name="Base">
+    <attribute name="id" />
+    <operation name="getId" />
+  </class>
+  <class id="User" name="User">
+    <attribute name="score" />
+    <attribute name="account" />
+    <operation name="login" />
+    <operation name="getScore" />
+  </class>
+  <class id="Account" name="Account">
+    <operation name="touch" />
+  </class>
+  <generalization source="User" target="Base" />
+  <association source="User" target="Account" />
+</model>

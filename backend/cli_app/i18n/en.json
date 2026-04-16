@@ -1,0 +1,110 @@
+{
+  "global": {
+    "prog": "smartmetric",
+    "description": "SmartMetric command line entry",
+    "usage_label": "Usage",
+    "commands_label": "Commands",
+    "arguments_label": "Arguments",
+    "options_label": "Options",
+    "lang_option": "Help language (zh/en)",
+    "help_option": "Show help information",
+    "usage": "python backend\\cli.py [--lang zh|en] <command> [options]"
+  },
+  "root_commands": {
+    "serve": "Start the SmartMetric backend service",
+    "oo-source": "Calculate CK/LK metrics from Java source files",
+    "oo-diagram": "Calculate diagram-level OO metrics from XML/OOM class diagrams",
+    "fp": "Calculate function points from a JSON file",
+    "cfg-source": "Generate control flow metrics from source files",
+    "cfg-graph": "Calculate complexity from a structured control flow graph",
+    "estimate": "Run project estimation",
+    "test": "Unified testing entry"
+  },
+  "commands": {
+    "serve": {
+      "path": "serve",
+      "summary": "Start the SmartMetric backend service",
+      "usage": "python backend\\cli.py serve [--host HOST] [--port PORT] [--debug]",
+      "options": {
+        "--host": "Bind host, default 127.0.0.1",
+        "--port": "Bind port, default 5000",
+        "--debug": "Enable Flask debug mode"
+      }
+    },
+    "oo-source": {
+      "path": "oo-source",
+      "summary": "Calculate CK/LK metrics from Java source files",
+      "usage": "python backend\\cli.py oo-source <files...>",
+      "arguments": {
+        "files": "One or more Java source file paths"
+      }
+    },
+    "oo-diagram": {
+      "path": "oo-diagram",
+      "summary": "Calculate diagram-level OO metrics from XML/OOM class diagrams",
+      "usage": "python backend\\cli.py oo-diagram <file>",
+      "arguments": {
+        "file": "Class diagram path (.xml/.oom)"
+      }
+    },
+    "fp": {
+      "path": "fp",
+      "summary": "Calculate function points from a JSON file",
+      "usage": "python backend\\cli.py fp <file>",
+      "arguments": {
+        "file": "Function point JSON input path"
+      }
+    },
+    "cfg-source": {
+      "path": "cfg-source",
+      "summary": "Generate control flow metrics from source files",
+      "usage": "python backend\\cli.py cfg-source <files...> [--language LANG]",
+      "arguments": {
+        "files": "One or more source file paths"
+      },
+      "options": {
+        "--language": "Optional language: auto/java/c/cpp/python"
+      }
+    },
+    "cfg-graph": {
+      "path": "cfg-graph",
+      "summary": "Calculate complexity from a structured control flow graph",
+      "usage": "python backend\\cli.py cfg-graph <file>",
+      "arguments": {
+        "file": "Graph file path (.json/.mmd/.mermaid/.dot)"
+      }
+    },
+    "estimate": {
+      "path": "estimate",
+      "summary": "Run project estimation",
+      "usage": "python backend\\cli.py estimate <file>",
+      "arguments": {
+        "file": "Estimation JSON input path"
+      }
+    },
+    "test.backend": {
+      "path": "test backend",
+      "summary": "Run backend automation tests",
+      "usage": "python backend\\cli.py test backend [--suite unit|smoke|all] [--start-server] [--base-url URL]",
+      "options": {
+        "--suite": "Select suite: unit, smoke, all",
+        "--start-server": "Start local backend before testing",
+        "--base-url": "Base URL when backend is already running",
+        "--host": "Host used when auto-starting backend",
+        "--port": "Port used when auto-starting backend"
+      }
+    },
+    "test.path": {
+      "path": "test path",
+      "summary": "Auto-detect and run a metric for a file path",
+      "usage": "python backend\\cli.py test path <path> [--metric METRIC] [--language LANG]",
+      "arguments": {
+        "path": "Path to the input file"
+      },
+      "options": {
+        "--metric": "Optional metric: auto/cfg-source/cfg-graph/oo-source/oo-diagram/fp/estimate",
+        "--language": "Optional language for source CFG analysis"
+      }
+    }
+  }
+}

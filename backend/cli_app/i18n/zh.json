@@ -1,0 +1,110 @@
+{
+  "global": {
+    "prog": "smartmetric",
+    "description": "SmartMetric 命令行入口",
+    "usage_label": "用法",
+    "commands_label": "命令",
+    "arguments_label": "参数",
+    "options_label": "选项",
+    "lang_option": "帮助文档语言（zh/en）",
+    "help_option": "显示帮助信息",
+    "usage": "python backend\\cli.py [--lang zh|en] <command> [options]"
+  },
+  "root_commands": {
+    "serve": "启动 SmartMetric 后端服务",
+    "oo-source": "从 Java 源码计算 CK/LK",
+    "oo-diagram": "从类图 XML/OOM 计算类图级 OO 指标",
+    "fp": "从 JSON 文件计算功能点",
+    "cfg-source": "从源码生成控制流图/圈复杂度",
+    "cfg-graph": "导入结构化控制流图计算圈复杂度",
+    "estimate": "项目估算",
+    "test": "统一测试入口"
+  },
+  "commands": {
+    "serve": {
+      "path": "serve",
+      "summary": "启动 SmartMetric 后端服务",
+      "usage": "python backend\\cli.py serve [--host HOST] [--port PORT] [--debug]",
+      "options": {
+        "--host": "绑定主机地址，默认 127.0.0.1",
+        "--port": "绑定端口，默认 5000",
+        "--debug": "开启 Flask debug 模式"
+      }
+    },
+    "oo-source": {
+      "path": "oo-source",
+      "summary": "从 Java 源码计算 CK/LK",
+      "usage": "python backend\\cli.py oo-source <files...>",
+      "arguments": {
+        "files": "一个或多个 Java 源码路径"
+      }
+    },
+    "oo-diagram": {
+      "path": "oo-diagram",
+      "summary": "从类图 XML/OOM 计算类图级 OO 指标",
+      "usage": "python backend\\cli.py oo-diagram <file>",
+      "arguments": {
+        "file": "类图文件路径（.xml/.oom）"
+      }
+    },
+    "fp": {
+      "path": "fp",
+      "summary": "从 JSON 文件计算功能点",
+      "usage": "python backend\\cli.py fp <file>",
+      "arguments": {
+        "file": "功能点输入 JSON 路径"
+      }
+    },
+    "cfg-source": {
+      "path": "cfg-source",
+      "summary": "从源码生成控制流图/圈复杂度",
+      "usage": "python backend\\cli.py cfg-source <files...> [--language LANG]",
+      "arguments": {
+        "files": "一个或多个源码文件路径"
+      },
+      "options": {
+        "--language": "可选语言，支持 auto/java/c/cpp/python"
+      }
+    },
+    "cfg-graph": {
+      "path": "cfg-graph",
+      "summary": "导入结构化控制流图计算圈复杂度",
+      "usage": "python backend\\cli.py cfg-graph <file>",
+      "arguments": {
+        "file": "图文件路径（.json/.mmd/.mermaid/.dot）"
+      }
+    },
+    "estimate": {
+      "path": "estimate",
+      "summary": "项目估算",
+      "usage": "python backend\\cli.py estimate <file>",
+      "arguments": {
+        "file": "估算输入 JSON 路径"
+      }
+    },
+    "test.backend": {
+      "path": "test backend",
+      "summary": "运行后端自动化测试",
+      "usage": "python backend\\cli.py test backend [--suite unit|smoke|all] [--start-server] [--base-url URL]",
+      "options": {
+        "--suite": "选择测试范围：unit、smoke、all",
+        "--start-server": "测试前自动启动本地后端服务",
+        "--base-url": "已启动后端时的访问地址",
+        "--host": "自动启动服务时绑定的 host",
+        "--port": "自动启动服务时绑定的 port"
+      }
+    },
+    "test.path": {
+      "path": "test path",
+      "summary": "按路径自动识别并执行度量",
+      "usage": "python backend\\cli.py test path <path> [--metric METRIC] [--language LANG]",
+      "arguments": {
+        "path": "待分析文件路径"
+      },
+      "options": {
+        "--metric": "可选 auto/cfg-source/cfg-graph/oo-source/oo-diagram/fp/estimate",
+        "--language": "源码控制流分析时可指定语言"
+      }
+    }
+  }
+}

@@ -8,8 +8,9 @@
 
 ```text
 ControlFlowAnalyzer
-  ├─ CStyleAnalyzer      Java / C / C++
-  └─ PythonAnalyzer      Python
+  ├─ JavaAstAnalyzer     Java，基于 javalang
+  ├─ PythonAstAnalyzer   Python，基于标准库 ast
+  └─ CStyleAnalyzer      C / C++，规则分析
 ```
 
 工厂方法：
@@ -43,22 +44,29 @@ backend/routes/metrics_45.py
 
 ## 当前实现方式
 
-当前是轻量级规则分析，不是完整 AST。
+当前是“AST 策略 + 规则策略”的混合实现。
 
-原因：
+已启用 AST 的语言：
 
-- Java 的 AST 通常需要 Eclipse ASTParser、JavaParser 或 javalang。
-- C/C++ 的 AST 通常需要 clang。
-- Python 可以用标准库 ast，但为了和多语言接口保持一致，当前先统一采用规则策略。
+```text
+Python -> 标准库 ast
+Java   -> javalang
+```
 
-当前实现已经预留替换点：只要实现 `ControlFlowAnalyzer` 接口，就能替换为 AST 版本。
+继续使用规则策略的语言：
+
+```text
+C/C++ -> CStyleAnalyzer
+```
+
+Java/Python AST 解析失败时，会 fallback 到原规则策略，避免接口直接失败。
 
 ## 后续 AST 升级建议
 
 ```text
-Java       -> JavaParser / Eclipse ASTParser / javalang
-C/C++      -> libclang / clang AST
-Python     -> ast.NodeVisitor
+Java       -> 当前使用 javalang；后续可升级 JavaParser / Eclipse ASTParser
+C/C++      -> 当前规则分析；后续可升级 libclang / clang AST
+Python     -> 当前使用 ast；后续可细化 ast.NodeVisitor
 ```
 
 升级时保持输出字段不变：

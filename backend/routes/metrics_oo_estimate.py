@@ -23,10 +23,11 @@ def oo_calculate():
     try:
         upload_files = request.files.getlist("files")
         if not upload_files:
-            return fail("请至少上传一个 Java 源码文件")
+            return fail("请至少上传一个源码文件")
 
+        language = request.form.get("language") or None
         files = [{"filename": f.filename, "content": f.read()} for f in upload_files]
-        result = analyze_oo_files(files)
+        result = analyze_oo_files(files, language)
         return ok(result)
     except Exception as exc:
         return fail(str(exc), 422)

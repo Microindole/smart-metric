@@ -50,6 +50,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const loading = ref(false)
 const countRows = reactive([
@@ -105,6 +106,20 @@ const calculate = async () => {
       gsc_factors: gscFactors.value,
     })
     Object.assign(result, data.data)
+    saveMetricSnapshot('function_point', {
+      description: '基于功能点计数和 GSC 因子自动生成。',
+      summary: {
+        UFP: data.data.ufp,
+        GSC总分: data.data.gsc_total,
+        VAF: data.data.vaf,
+        FP: data.data.fp,
+      },
+      rows: (data.data.details || []).map((item) => ({
+        类型: item.type,
+        说明: item.name,
+        小计: item.subtotal,
+      })),
+    })
     message.success('功能点计算完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '计算失败')

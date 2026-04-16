@@ -17,9 +17,10 @@ class OoSourceCommand(BaseCommand):
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)
         parser.add_argument("files", nargs="+")
+        parser.add_argument("--language", default=None)
         parser.set_defaults(command_key=self.key)
 
     def run(self, args: Namespace, ctx: CliContext) -> int:
         files = [read_binary_file(path) for path in args.files]
-        print_json(analyze_oo_files(files))
+        print_json(analyze_oo_files(files, args.language))
         return 0

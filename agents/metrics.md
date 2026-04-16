@@ -82,7 +82,7 @@ frontend/pages/cfg-metric.vue
 
 ```text
 从源码生成控制流图
-导入 JSON/Mermaid/DOT 控制流图
+导入 JSON/Mermaid/DOT/OOM/XML 控制流图
 计算 V(G)=E-N+2P
 计算 decision_points + 1
 ```
@@ -104,6 +104,8 @@ Java/Python AST 解析失败时会 fallback 到规则策略，接口不直接崩
 JSON
 Mermaid
 DOT
+OOM
+XML
 ```
 
 图片识别应作为扩展功能，需要单独说明准确性和依赖。
@@ -135,8 +137,8 @@ avg_method_complexity
 当前支持：
 
 ```text
-Java 源码
-轻量类结构分析
+Java / C / C++ / Python / JavaScript 源码
+策略模式
 ```
 
 另外已支持类图级 OO 度量：
@@ -198,6 +200,50 @@ UCP
 LoC
 ```
 
+## 项目目录级扫描
+
+位置：
+
+```text
+backend/core/project_metric/
+backend/cli.py project-scan
+```
+
+职责：
+
+```text
+递归扫描项目目录
+统计总代码量、各文件 LoC、语言分布
+提取源码依赖关系
+排查上帝文件与上帝类
+自动识别并分析用例图、类图、控制流图设计文件
+```
+
+当前默认模块：
+
+```text
+inventory
+loc
+dependency
+oo
+design
+```
+
+忽略规则：
+
+```text
+默认忽略 .git/.venv/node_modules/.nuxt/.output/dist/build 等目录
+可追加目录名忽略和 glob 通配忽略
+目录扫描不会自动推导 FP 或估算输入
+```
+
+说明：
+
+```text
+功能点 FP 和项目估算仍然依赖用户输入，不会仅凭目录扫描自动推导。
+项目目录级扫描用于汇总代码/设计资产，并复用已有度量模块。
+```
+
 ## CLI
 
 CLI 入口：
@@ -216,7 +262,26 @@ test path
 oo-source
 oo-diagram
 fp
+report
 cfg-source
 cfg-graph
 estimate
+project-scan
+```
+
+## 报告导出
+
+位置：
+
+```text
+backend/core/report_export.py
+```
+
+职责：
+
+```text
+统一报告数据结构
+导出 Markdown
+导出 HTML
+导出 PDF
 ```

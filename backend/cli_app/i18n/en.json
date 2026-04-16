@@ -12,9 +12,11 @@
   },
   "root_commands": {
     "serve": "Start the SmartMetric backend service",
-    "oo-source": "Calculate CK/LK metrics from Java source files",
+    "oo-source": "Calculate CK/LK metrics from multi-language source files",
     "oo-diagram": "Calculate diagram-level OO metrics from XML/OOM class diagrams",
     "fp": "Calculate function points from a JSON file",
+    "project-scan": "Scan a project directory for code volume, dependencies, diagrams, and god files",
+    "report": "Export a Markdown/HTML/PDF report",
     "cfg-source": "Generate control flow metrics from source files",
     "cfg-graph": "Calculate complexity from a structured control flow graph",
     "estimate": "Run project estimation",
@@ -33,10 +35,13 @@
     },
     "oo-source": {
       "path": "oo-source",
-      "summary": "Calculate CK/LK metrics from Java source files",
-      "usage": "python backend\\cli.py oo-source <files...>",
+      "summary": "Calculate CK/LK and structural metrics from multi-language source files",
+      "usage": "python backend\\cli.py oo-source <files...> [--language LANG]",
       "arguments": {
-        "files": "One or more Java source file paths"
+        "files": "One or more source file paths"
+      },
+      "options": {
+        "--language": "Optional language: auto/java/c/cpp/python/javascript"
       }
     },
     "oo-diagram": {
@@ -53,6 +58,32 @@
       "usage": "python backend\\cli.py fp <file>",
       "arguments": {
         "file": "Function point JSON input path"
+      }
+    },
+    "project-scan": {
+      "path": "project-scan",
+      "summary": "Scan a project directory for code volume, dependencies, diagrams, and god files",
+      "usage": "python backend\\cli.py project-scan <path> [--modules inventory,loc,dependency,oo,design]",
+      "arguments": {
+        "path": "Project root directory path"
+      },
+      "options": {
+        "--modules": "Optional modules: inventory, loc, dependency, oo, design",
+        "--ignore-dir": "Append an ignored directory name; repeatable",
+        "--ignore-glob": "Append an ignored glob pattern; repeatable",
+        "--no-default-ignore": "Disable the built-in ignored directory set"
+      }
+    },
+    "report": {
+      "path": "report",
+      "summary": "Export a Markdown/HTML/PDF report",
+      "usage": "python backend\\cli.py report <file> [--format markdown|html|pdf] [--output PATH]",
+      "arguments": {
+        "file": "Report JSON input path"
+      },
+      "options": {
+        "--format": "Report format: markdown/html/pdf",
+        "--output": "Output file path"
       }
     },
     "cfg-source": {

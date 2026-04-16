@@ -10,6 +10,18 @@
 .\.venv\Scripts\python.exe -m unittest tests.test_45_metrics tests.test_oo_estimate_metrics
 ```
 
+报告导出测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_report_export
+```
+
+项目目录级扫描测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_project_metric
+```
+
 统一自动化入口：
 
 ```powershell
@@ -55,8 +67,20 @@ npm run dev:fast -- --host 127.0.0.1 --port 3000
 /loc-metric
 /function-point
 /cfg-metric
+/project-metric
 /oo-metric
 /estimate-metric
+/report-export
+```
+
+报告导出页手动验证：
+
+```text
+1. 先在任一度量页面完成一次计算
+2. 进入 /report-export
+3. 勾选要参与汇总的模块
+4. 点击“自动汇总已保存结果”
+5. 导出 markdown/html/pdf
 ```
 
 ## 样例文件
@@ -71,6 +95,8 @@ samples/class_diagram_demo.xml
 samples/cfg_demo.json
 samples/cfg_demo.mmd
 samples/cfg_demo.dot
+samples/cfg_demo.oom
+samples/report_demo.json
 ```
 
 CLI 验证示例：
@@ -80,8 +106,14 @@ python backend/cli.py --help
 python backend/cli.py --lang en --help
 python backend/cli.py serve --host 127.0.0.1 --port 5000
 python backend/cli.py oo-source samples/oo_demo.java
+python backend/cli.py oo-source --language python samples/sample_script.py
 python backend/cli.py oo-diagram samples/class_diagram_demo.xml
 python backend/cli.py cfg-graph samples/cfg_demo.json
+python backend/cli.py cfg-graph samples/cfg_demo.oom
+python backend/cli.py project-scan D:\works\smart-metric
+python backend/cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
+python backend/cli.py report samples/report_demo.json --format markdown
+python backend/cli.py report samples/report_demo.json --format pdf
 ```
 
 自动化测试脚本示例：

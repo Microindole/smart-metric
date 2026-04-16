@@ -80,10 +80,11 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const selectedOom = ref(null)
 const selectedOomName = ref('')
@@ -158,6 +159,23 @@ const calculate = async () => {
       ef: data.data.ef,
       ucp: data.data.ucp,
     })
+    saveMetricSnapshot('usecase', {
+      description: '基于用例点模型计算 UCP。',
+      summary: {
+        UUC: data.data.uuc,
+        UAW: data.data.uaw,
+        TCF: data.data.tcf,
+        EF: data.data.ef,
+        UCP: data.data.ucp,
+      },
+      rows: [
+        { 指标: 'UUC', 数值: data.data.uuc },
+        { 指标: 'UAW', 数值: data.data.uaw },
+        { 指标: 'TCF', 数值: data.data.tcf },
+        { 指标: 'EF', 数值: data.data.ef },
+        { 指标: 'UCP', 数值: data.data.ucp },
+      ],
+    })
     message.success('UCP 计算完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '计算失败')
@@ -187,7 +205,6 @@ const exportResult = async () => {
   }
 }
 
-onMounted(loadSampleFactors)
 </script>
 
 <style scoped>

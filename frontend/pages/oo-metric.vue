@@ -8,10 +8,11 @@
         </a-tabs>
       </a-card>
 
-      <a-card v-if="mode === 'source'" title="Java 类代码上传">
+      <a-card v-if="mode === 'source'" title="源码级 OO/结构度量">
         <a-space>
-          <input type="file" multiple accept=".java" @change="onFilesSelected" />
-          <a-button type="primary" :loading="loading" @click="analyze">开始 CK/LK 度量</a-button>
+          <a-select v-model:value="sourceLanguage" style="width: 180px" :options="languageOptions" />
+          <input type="file" multiple accept=".java,.py,.js,.jsx,.ts,.tsx,.cpp,.cc,.cxx,.hpp,.hh,.hxx,.c,.h" @change="onFilesSelected" />
+          <a-button type="primary" :loading="loading" @click="analyze">开始源码度量</a-button>
           <a-button @click="exportRows">导出 CSV</a-button>
         </a-space>
       </a-card>
@@ -47,10 +48,12 @@ import { computed, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const mode = ref('source')
 const selectedFiles = ref([])
 const selectedDiagram = ref(null)
+const sourceLanguage = ref('auto')
 const loading = ref(false)
 const diagramLoading = ref(false)
 const rows = ref([])
@@ -89,6 +92,14 @@ const diagramColumns = [
   { title: 'NOA', dataIndex: ['diagram_lk', 'noa'], key: 'noa', width: 90 },
 ]
 const columns = computed(() => (mode.value === 'source' ? sourceColumns : diagramColumns))
+const languageOptions = [
+  { label: '自动识别', value: 'auto' },
+  { label: 'Java', value: 'java' },
+  { label: 'C', value: 'c' },
+  { label: 'C++', value: 'cpp' },
+  { label: 'Python', value: 'python' },
+  { label: 'JavaScript', value: 'javascript' },
+]
 
 const onFilesSelected = (e) => {
   selectedFiles.value = Array.from(e.target.files || [])
@@ -100,17 +111,39 @@ const onDiagramSelected = (e) => {
 
 const analyze = async () => {
   if (!selectedFiles.value.length) {
-    message.warning('请先选择 Java 源码文件')
+    message.warning('请先选择源码文件')
     return
   }
   loading.value = true
   try {
     const formData = new FormData()
     selectedFiles.value.forEach((f) => formData.append('files', f))
+    if (sourceLanguage.value !== 'auto') {
+      formData.append('language', sourceLanguage.value)
+    }
     const { data } = await api.post('/api/metrics/oo/calculate', formData)
     rows.value = data.data.classes
     Object.assign(summary, data.data.summary)
-    message.success('面向对象度量完成')
+    saveMetricSnapshot('oo', {
+      description: '基于多语言源码进行 CK/LK 与结构指标分析。',
+      summary: {
+        类数: data.data.summary.class_count,
+        方法数: data.data.summary.total_methods,
+        属性数: data.data.summary.total_attributes,
+        平均WMC: data.data.summary.average_wmc,
+        最大DIT: data.data.summary.max_dit,
+        最大CBO: data.data.summary.max_cbo,
+      },
+      rows: (data.data.classes || []).map((item) => ({
+        文件名: item.filename,
+        类名: item.class_name,
+        语言: item.language,
+        WMC: item.ck?.wmc,
+        DIT: item.ck?.dit,
+        CBO: item.ck?.cbo,
+      })),
+    })
+    message.success('源码度量完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '分析失败')
   } finally {
@@ -130,6 +163,24 @@ const analyzeDiagram = async () => {
     const { data } = await api.post('/api/metrics/oo/diagram-calculate', formData)
     rows.value = data.data.classes
     Object.assign(summary, data.data.summary)
+    saveMetricSnapshot('oo', {
+      description: '基于类图文件进行类图级面向对象度量。',
+      summary: {
+        类数: data.data.summary.class_count,
+        方法数: data.data.summary.total_methods,
+        属性数: data.data.summary.total_attributes,
+        最大DIT: data.data.summary.max_dit,
+        最大CBO: data.data.summary.max_cbo,
+        关系数: data.data.summary.relation_count,
+      },
+      rows: (data.data.classes || []).map((item) => ({
+        文件名: item.filename,
+        类名: item.class_name,
+        DIT: item.diagram_ck?.dit,
+        NOC: item.diagram_ck?.noc,
+        CBO: item.diagram_ck?.cbo,
+      })),
+    })
     message.success('类图级面向对象度量完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '类图分析失败')

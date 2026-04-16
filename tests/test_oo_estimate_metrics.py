@@ -45,6 +45,72 @@ class OoMetricTests(unittest.TestCase):
         self.assertEqual(user["ck"]["dit"], 1)
         self.assertGreaterEqual(user["ck"]["wmc"], 3)
         self.assertEqual(user["lk"]["nom"], 2)
+        self.assertEqual(user["language"], "java")
+
+    def test_analyzes_python_source_metrics(self):
+        source = b"""
+class Base:
+    def ping(self):
+        return 1
+
+class User(Base):
+    def __init__(self):
+        self.score = 0
+
+    def login(self, password):
+        if password and len(password) > 6:
+            self.score += 1
+"""
+        result = analyze_oo_files([{"filename": "user.py", "content": source}])
+        user = next(item for item in result["classes"] if item["class_name"] == "User")
+        self.assertEqual(user["parent"], "Base")
+        self.assertGreaterEqual(user["ck"]["wmc"], 2)
+        self.assertEqual(user["language"], "python")
+
+    def test_analyzes_javascript_and_cpp_source_metrics(self):
+        js_source = b"""
+class Account {
+  touch() { return 1; }
+}
+class User extends Account {
+  constructor() {
+    this.score = 0;
+  }
+  login(password) {
+    if (password && password.length > 6) {
+      this.score += 1;
+    }
+  }
+}
+"""
+        cpp_source = b"""
+class Base {
+public:
+    int id;
+    int getId() { return id; }
+};
+class User : public Base {
+public:
+    int score;
+    void login(int password) {
+        if (password > 0) {
+            score++;
+        }
+    }
+};
+"""
+        result = analyze_oo_files(
+            [
+                {"filename": "user.js", "content": js_source},
+                {"filename": "user.cpp", "content": cpp_source},
+            ]
+        )
+        js_user = next(item for item in result["classes"] if item["filename"] == "user.js" and item["class_name"] == "User")
+        cpp_user = next(item for item in result["classes"] if item["filename"] == "user.cpp" and item["class_name"] == "User")
+        self.assertEqual(js_user["parent"], "Account")
+        self.assertEqual(js_user["language"], "javascript")
+        self.assertEqual(cpp_user["parent"], "Base")
+        self.assertEqual(cpp_user["language"], "cpp")
 
     def test_analyzes_class_diagram_metrics(self):
         source = b"""
@@ -107,6 +173,23 @@ class OoEstimateApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["data"]["summary"]["class_count"], 1)
+
+    def test_oo_api_python(self):
+        response = self.client.post(
+            "/api/metrics/oo/calculate",
+            data={
+                "language": "python",
+                "files": (
+                    io.BytesIO(b"class User:\n    def login(self, password):\n        if password:\n            return True\n"),
+                    "user.py",
+                ),
+            },
+            content_type="multipart/form-data",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()["data"]["classes"][0]
+        self.assertEqual(payload["language"], "python")
 
     def test_oo_diagram_api(self):
         response = self.client.post(

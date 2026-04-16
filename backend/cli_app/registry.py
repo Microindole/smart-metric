@@ -6,6 +6,8 @@ from .commands.estimate_command import EstimateCommand
 from .commands.fp_command import FunctionPointCommand
 from .commands.oo_diagram_command import OoDiagramCommand
 from .commands.oo_source_command import OoSourceCommand
+from .commands.project_command import ProjectCommand
+from .commands.report_command import ReportCommand
 from .commands.serve_command import ServeCommand
 from .commands.test_backend_command import TestBackendCommand
 from .commands.test_path_command import TestPathCommand
@@ -17,6 +19,8 @@ def build_command_registry():
         "oo-source": OoSourceCommand(),
         "oo-diagram": OoDiagramCommand(),
         "fp": FunctionPointCommand(),
+        "project-scan": ProjectCommand(),
+        "report": ReportCommand(),
         "cfg-source": CfgSourceCommand(),
         "cfg-graph": CfgGraphCommand(),
         "estimate": EstimateCommand(),

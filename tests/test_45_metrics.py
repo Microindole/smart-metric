@@ -100,6 +100,27 @@ class Cfg45Tests(unittest.TestCase):
         self.assertEqual(result["edge_count"], 2)
         self.assertEqual(result["cyclomatic_complexity"], 1)
 
+    def test_imports_oom_graph(self):
+        content = b"""
+<Root>
+  <c:Activities><o:Activity Id="A1" Name="DoWork" /></c:Activities>
+  <c:Decisions><o:Decision Id="D1" Name="Judge" /></c:Decisions>
+  <c:Start><o:Start Id="S1" Name="Start" /></c:Start>
+  <c:End><o:End Id="E1" Name="End" /></c:End>
+  <c:Flow>
+    <o:ActivityFlow Id="F1"><c:Object1><o:Start Ref="S1" /></c:Object1><c:Object2><o:Decision Ref="D1" /></c:Object2></o:ActivityFlow>
+    <o:ActivityFlow Id="F2"><c:Object1><o:Decision Ref="D1" /></c:Object1><c:Object2><o:Activity Ref="A1" /></c:Object2></o:ActivityFlow>
+    <o:ActivityFlow Id="F3"><c:Object1><o:Activity Ref="A1" /></c:Object1><c:Object2><o:End Ref="E1" /></c:Object2></o:ActivityFlow>
+  </c:Flow>
+</Root>
+"""
+        result = analyze_imported_graph(content, "demo.oom")
+
+        self.assertEqual(result["format"], "xml")
+        self.assertEqual(result["node_count"], 4)
+        self.assertEqual(result["edge_count"], 3)
+        self.assertEqual(result["cyclomatic_complexity"], 1)
+
 
 class Api45Tests(unittest.TestCase):
     def setUp(self):
@@ -146,6 +167,25 @@ class Api45Tests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.get_json()["data"]
         self.assertEqual(data["format"], "json")
+        self.assertEqual(data["cyclomatic_complexity"], 1)
+
+    def test_cfg_import_oom_api(self):
+        response = self.client.post(
+            "/api/metrics/cfg/import-graph",
+            data={
+                "file": (
+                    io.BytesIO(
+                        b"<Root><c:Activities><o:Activity Id='A1' Name='DoWork'/></c:Activities><c:Decisions><o:Decision Id='D1' Name='Judge'/></c:Decisions><c:Start><o:Start Id='S1' Name='Start'/></c:Start><c:End><o:End Id='E1' Name='End'/></c:End><c:Flow><o:ActivityFlow Id='F1'><c:Object1><o:Start Ref='S1'/></c:Object1><c:Object2><o:Decision Ref='D1'/></c:Object2></o:ActivityFlow><o:ActivityFlow Id='F2'><c:Object1><o:Decision Ref='D1'/></c:Object1><c:Object2><o:Activity Ref='A1'/></c:Object2></o:ActivityFlow><o:ActivityFlow Id='F3'><c:Object1><o:Activity Ref='A1'/></c:Object1><c:Object2><o:End Ref='E1'/></c:Object2></o:ActivityFlow></c:Flow></Root>"
+                    ),
+                    "demo.oom",
+                ),
+            },
+            content_type="multipart/form-data",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()["data"]
+        self.assertEqual(data["format"], "xml")
         self.assertEqual(data["cyclomatic_complexity"], 1)
 
 

@@ -57,6 +57,7 @@ import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const loading = ref(false)
 const selectedFiles = ref([])
@@ -122,6 +123,23 @@ const analyze = async () => {
     classRows.value = (data.data.class_scales || []).map((x, i) => ({ ...x, rowKey: `${x.filename}-${x.class_name}-${i}` }))
     methodRows.value = (data.data.method_scales || []).map((x, i) => ({ ...x, rowKey: `${x.filename}-${x.class_name}-${x.method_name}-${i}` }))
     javaSummaries.value = data.data.java_structure_summaries || []
+    saveMetricSnapshot('loc', {
+      description: '基于源码文件进行代码行与结构统计。',
+      summary: {
+        文件数: data.data.summary.file_count,
+        总行数: data.data.summary.total_lines,
+        有效代码行: data.data.summary.code_lines,
+        注释行: data.data.summary.comment_lines,
+        类总数: data.data.summary.class_count,
+        方法总数: data.data.summary.method_count,
+      },
+      rows: (data.data.files || []).map((item) => ({
+        文件名: item.filename,
+        语言: item.language,
+        总行数: item.total_lines,
+        有效代码行: item.code_lines,
+      })),
+    })
     message.success('代码行统计完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '统计失败')

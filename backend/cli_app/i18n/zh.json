@@ -12,9 +12,11 @@
   },
   "root_commands": {
     "serve": "启动 SmartMetric 后端服务",
-    "oo-source": "从 Java 源码计算 CK/LK",
+    "oo-source": "从多语言源码计算 CK/LK",
     "oo-diagram": "从类图 XML/OOM 计算类图级 OO 指标",
     "fp": "从 JSON 文件计算功能点",
+    "project-scan": "按项目目录汇总代码、依赖、设计图与上帝文件",
+    "report": "导出 Markdown/HTML/PDF 报告",
     "cfg-source": "从源码生成控制流图/圈复杂度",
     "cfg-graph": "导入结构化控制流图计算圈复杂度",
     "estimate": "项目估算",
@@ -33,10 +35,13 @@
     },
     "oo-source": {
       "path": "oo-source",
-      "summary": "从 Java 源码计算 CK/LK",
-      "usage": "python backend\\cli.py oo-source <files...>",
+      "summary": "从多语言源码计算 CK/LK/结构指标",
+      "usage": "python backend\\cli.py oo-source <files...> [--language LANG]",
       "arguments": {
-        "files": "一个或多个 Java 源码路径"
+        "files": "一个或多个源码路径"
+      },
+      "options": {
+        "--language": "可选语言，支持 auto/java/c/cpp/python/javascript"
       }
     },
     "oo-diagram": {
@@ -53,6 +58,32 @@
       "usage": "python backend\\cli.py fp <file>",
       "arguments": {
         "file": "功能点输入 JSON 路径"
+      }
+    },
+    "project-scan": {
+      "path": "project-scan",
+      "summary": "按项目目录汇总代码、依赖、设计图与上帝文件",
+      "usage": "python backend\\cli.py project-scan <path> [--modules inventory,loc,dependency,oo,design]",
+      "arguments": {
+        "path": "项目根目录路径"
+      },
+      "options": {
+        "--modules": "可选模块列表：inventory、loc、dependency、oo、design",
+        "--ignore-dir": "追加忽略目录名，可重复传入",
+        "--ignore-glob": "追加忽略通配规则，可重复传入",
+        "--no-default-ignore": "关闭默认忽略目录集合"
+      }
+    },
+    "report": {
+      "path": "report",
+      "summary": "导出 Markdown/HTML/PDF 报告",
+      "usage": "python backend\\cli.py report <file> [--format markdown|html|pdf] [--output PATH]",
+      "arguments": {
+        "file": "报告 JSON 输入路径"
+      },
+      "options": {
+        "--format": "报告格式：markdown/html/pdf",
+        "--output": "输出文件路径"
       }
     },
     "cfg-source": {

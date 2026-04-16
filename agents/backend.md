@@ -60,7 +60,7 @@ app.register_blueprint(<blueprint>)
 backend/routes/metrics_45.py
   功能点度量
   控制流图源码分析
-  控制流图导入
+  控制流图导入（JSON / Mermaid / DOT / OOM / XML）
 
 backend/routes/metrics_oo_estimate.py
   面向对象 CK/LK 度量
@@ -72,9 +72,11 @@ backend/routes/metrics_oo_estimate.py
 
 ```text
 javalang
+reportlab
 ```
 
 用途：Java 控制流图 AST 策略。
+`reportlab` 用于 PDF 报告导出。
 
 ## 当前核心模块
 
@@ -87,6 +89,7 @@ backend/core/oo_metric/
 backend/core/estimate_metric/
 backend/core/diagram_parser/
 backend/core/class_diagram_metric/
+backend/core/project_metric/
 ```
 
 CLI 入口：
@@ -104,6 +107,14 @@ CLI 不替代 Web，但属于正式入口之一。新增度量模块时，如果
 python backend\cli.py serve --host 127.0.0.1 --port 5000
 ```
 
+项目目录级扫描：
+
+```powershell
+python backend\cli.py project-scan D:\works\smart-metric
+python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
+python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
+```
+
 并支持统一测试入口：
 
 ```powershell
@@ -117,6 +128,39 @@ CLI 设计要求：
 命令模式：backend/cli_app/commands/*.py
 帮助资源外置：backend/cli_app/i18n/*.json
 命令逻辑复用：backend/core/*
+```
+
+报告导出：
+
+```text
+backend/core/report_export.py
+/api/export/report
+backend/cli.py report
+```
+
+项目目录级扫描模块：
+
+```text
+backend/core/project_metric/
+backend/cli.py project-scan
+```
+
+职责：
+
+```text
+递归扫描项目目录
+统计总代码量与各文件 LoC
+分析源码依赖关系
+排查上帝文件与上帝类
+清点并分析用例图/类图/控制流图设计文件
+```
+
+忽略配置：
+
+```text
+默认忽略 .git/.venv/node_modules/.nuxt/.output/dist/build 等目录
+CLI 可追加 --ignore-dir 和 --ignore-glob
+后端 API: POST /api/metrics/project/scan
 ```
 
 ## 多语言控制流设计
@@ -147,7 +191,17 @@ backend/core/cfg_metric/strategies/factory.py
 backend/core/oo_metric/
 ```
 
-当前仅支持 Java 源码。输出 CK 指标：
+当前源码级度量采用策略模式，支持：
+
+```text
+Java
+C
+C++
+Python
+JavaScript
+```
+
+输出 CK 指标：
 
 ```text
 WMC
@@ -173,6 +227,12 @@ avg_method_complexity
 
 ```text
 backend/core/class_diagram_metric/
+```
+
+源码级策略位置：
+
+```text
+backend/core/oo_metric/strategies/
 ```
 
 ## 后端测试

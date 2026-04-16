@@ -25,9 +25,9 @@
         </a-space>
       </a-card>
 
-      <a-card v-else title="控制流图文件导入（JSON/Mermaid/DOT）">
+      <a-card v-else title="控制流图文件导入（JSON/Mermaid/DOT/OOM/XML）">
         <a-space direction="vertical" style="width: 100%">
-          <input type="file" accept=".json,.mmd,.mermaid,.dot" @change="onGraphSelected" />
+          <input type="file" accept=".json,.mmd,.mermaid,.dot,.oom,.xml" @change="onGraphSelected" />
           <a-space>
             <a-button type="primary" :loading="graphLoading" @click="importGraph">导入并计算</a-button>
           </a-space>
@@ -62,6 +62,7 @@ import { h, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const loading = ref(false)
 const graphLoading = ref(false)
@@ -125,6 +126,20 @@ const analyze = async () => {
     rows.value = data.data.files
     Object.assign(summary, data.data.summary)
     selectedRow.value = rows.value[0] || null
+    saveMetricSnapshot('cfg', {
+      description: '基于源码生成控制流图并计算圈复杂度。',
+      summary: {
+        文件数: data.data.summary.file_count,
+        最大圈复杂度: data.data.summary.max_complexity,
+        平均圈复杂度: data.data.summary.average_complexity,
+        判定点总数: data.data.summary.total_decision_points,
+      },
+      rows: (data.data.files || []).map((item) => ({
+        文件名: item.filename,
+        语言: item.language,
+        圈复杂度: item.cyclomatic_complexity,
+      })),
+    })
     message.success('控制流图度量完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '分析失败')
@@ -158,6 +173,25 @@ const importGraph = async () => {
       edge_count: item.edge_count,
     })
     selectedRow.value = item
+    saveMetricSnapshot('cfg', {
+      description: '基于导入的控制流图文件计算圈复杂度。',
+      summary: {
+        文件数: 1,
+        格式: item.format,
+        节点数: item.node_count,
+        边数: item.edge_count,
+        圈复杂度: item.cyclomatic_complexity,
+      },
+      rows: [
+        {
+          文件名: item.filename,
+          格式: item.format,
+          节点数: item.node_count,
+          边数: item.edge_count,
+          圈复杂度: item.cyclomatic_complexity,
+        },
+      ],
+    })
     message.success('控制流图导入完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '导入失败')

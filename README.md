@@ -7,13 +7,20 @@ SmartMetric 是一个前后端分离的软件度量自动化工具，用于支�
 - 用例点度量 `UUC / UAW / TCF / EF / UCP`
 - 代码行度量 `LoC`
 - 功能点度量 `FP`
-- 控制流图导入与圈复杂度度量
+- 控制流图导入与圈复杂度度量（支持 JSON / Mermaid / DOT / OOM / XML）
 - 源码控制流分析（Java / Python / C / C++）
-- 面向对象度量 `CK / LK`
+- 面向对象度量 `CK / LK`（源码级支持 Java / C / C++ / Python / JavaScript）
 - 类图级 OO 度量（`.xml` / `.oom`）
+- 项目目录级扫描（总代码量、各文件 LoC、依赖关系、设计图清点、上帝文件/类排查）
 - 项目工作量 / 成本 / 工期 / 人员估算
 - CSV 导出
+- Markdown / HTML / PDF 报告导出（支持从前端已保存度量结果自动汇总，并可选择参与汇总的模块）
 - 根目录自动化测试脚本
+
+说明：
+
+- 项目目录级扫描会自动汇总代码文件和设计图，并复用已有 LoC / CFG / 用例图 / 类图 / OO 模块。
+- 功能点与项目估算仍属于用户输入驱动模块，不会仅凭目录自动推导。
 
 ## 目录结构
 
@@ -59,6 +66,18 @@ npm run dev
 http://127.0.0.1:3000
 ```
 
+前端页面包括：
+
+- `/`
+- `/usecase-metric`
+- `/loc-metric`
+- `/function-point`
+- `/oo-metric`
+- `/cfg-metric`
+- `/project-metric`
+- `/estimate-metric`
+- `/report-export`
+
 ### 3. CLI 入口
 
 查看帮助：
@@ -81,6 +100,8 @@ python backend\cli.py test backend --suite all --start-server
 python backend\cli.py test path samples\class_diagram_demo.xml
 python backend\cli.py test path samples\cfg_demo.json
 python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
+python backend\cli.py project-scan D:\works\smart-metric
+python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
 ```
 
 通过 CLI 启动后端：
@@ -95,7 +116,15 @@ CLI 计算示例：
 python backend\cli.py oo-source samples\oo_demo.java
 python backend\cli.py oo-diagram samples\class_diagram_demo.xml
 python backend\cli.py cfg-graph samples\cfg_demo.json
+python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
+python backend\cli.py report samples\report_demo.json --format markdown
+python backend\cli.py report samples\report_demo.json --format pdf
 ```
+
+项目扫描忽略配置：
+
+- CLI：`--ignore-dir <目录名>` 可重复传入，`--ignore-glob <通配规则>` 可重复传入，`--no-default-ignore` 可关闭默认忽略目录。
+- Web：打开 `/project-metric`，填写项目路径后，在“忽略目录”和“忽略通配规则”文本框中按行配置。
 
 ## 自动化测试
 
@@ -114,9 +143,7 @@ python backend\cli.py cfg-graph samples\cfg_demo.json
 
 说明见：
 
-```text
-scripts/README.md
-```
+[scripts/README.md](./scripts/README.md)
 
 ## 核心接口
 
@@ -133,6 +160,7 @@ scripts/README.md
 - `POST /api/metrics/oo/diagram-calculate`
 - `POST /api/metrics/estimate/calculate`
 - `POST /api/export`
+- `POST /api/export/report`
 
 ## 样例文件
 
@@ -147,17 +175,20 @@ scripts/README.md
 - `cfg_demo.json`
 - `cfg_demo.mmd`
 - `cfg_demo.dot`
+- `cfg_demo.oom`
+- `report_demo.json`
 
 ## 协作与提交
 
 请先阅读：
 
-```text
-CONTRIBUTING.md
-```
+[CONTRIBUTING.md](./CONTRIBUTING.md)
 
 如果是 agent 接手仓库，还要先读：
 
-```text
-AGENTS.md
-```
+[AGENTS.md](./AGENTS.md)
+
+
+
+## License
+[Apache-2.0](./LICENSE)

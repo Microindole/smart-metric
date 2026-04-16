@@ -1,0 +1,42 @@
+<Root>
+  <c:Activities>
+    <o:Activity Id="A1" Name="ReadInput" />
+    <o:Activity Id="A2" Name="HandlePositive" />
+    <o:Activity Id="A3" Name="HandleNegative" />
+  </c:Activities>
+  <c:Decisions>
+    <o:Decision Id="D1" Name="CheckValue" />
+  </c:Decisions>
+  <c:Start>
+    <o:Start Id="S1" Name="Start" />
+  </c:Start>
+  <c:End>
+    <o:End Id="E1" Name="End" />
+  </c:End>
+  <c:Flow>
+    <o:ActivityFlow Id="F1">
+      <c:Object1><o:Start Ref="S1" /></c:Object1>
+      <c:Object2><o:Activity Ref="A1" /></c:Object2>
+    </o:ActivityFlow>
+    <o:ActivityFlow Id="F2">
+      <c:Object1><o:Activity Ref="A1" /></c:Object1>
+      <c:Object2><o:Decision Ref="D1" /></c:Object2>
+    </o:ActivityFlow>
+    <o:ActivityFlow Id="F3">
+      <c:Object1><o:Decision Ref="D1" /></c:Object1>
+      <c:Object2><o:Activity Ref="A2" /></c:Object2>
+    </o:ActivityFlow>
+    <o:ActivityFlow Id="F4">
+      <c:Object1><o:Decision Ref="D1" /></c:Object1>
+      <c:Object2><o:Activity Ref="A3" /></c:Object2>
+    </o:ActivityFlow>
+    <o:ActivityFlow Id="F5">
+      <c:Object1><o:Activity Ref="A2" /></c:Object1>
+      <c:Object2><o:End Ref="E1" /></c:Object2>
+    </o:ActivityFlow>
+    <o:ActivityFlow Id="F6">
+      <c:Object1><o:Activity Ref="A3" /></c:Object1>
+      <c:Object2><o:End Ref="E1" /></c:Object2>
+    </o:ActivityFlow>
+  </c:Flow>
+</Root>

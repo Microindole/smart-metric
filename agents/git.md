@@ -10,7 +10,7 @@
 
 ```text
 user.name  = Microindole
-user.email = 1513979779@qq.com
+user.email = xxx@xx.xx
 ```
 
 检查：
@@ -24,7 +24,7 @@ git config --local --get user.email
 
 ```powershell
 git config --local user.name "Microindole"
-git config --local user.email "1513979779@qq.com"
+git config --local user.email "xxx@xx.xx"
 ```
 
 不要使用 `--global`。

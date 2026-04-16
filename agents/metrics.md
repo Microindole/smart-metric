@@ -82,7 +82,7 @@ frontend/pages/cfg-metric.vue
 
 ```text
 从源码生成控制流图
-导入 JSON/Mermaid/DOT 控制流图
+导入 JSON/Mermaid/DOT/OOM/XML 控制流图
 计算 V(G)=E-N+2P
 计算 decision_points + 1
 ```
@@ -104,6 +104,8 @@ Java/Python AST 解析失败时会 fallback 到规则策略，接口不直接崩
 JSON
 Mermaid
 DOT
+OOM
+XML
 ```
 
 图片识别应作为扩展功能，需要单独说明准确性和依赖。

@@ -7,7 +7,7 @@ SmartMetric 是一个前后端分离的软件度量自动化工具，用于支�
 - 用例点度量 `UUC / UAW / TCF / EF / UCP`
 - 代码行度量 `LoC`
 - 功能点度量 `FP`
-- 控制流图导入与圈复杂度度量
+- 控制流图导入与圈复杂度度量（支持 JSON / Mermaid / DOT / OOM / XML）
 - 源码控制流分析（Java / Python / C / C++）
 - 面向对象度量 `CK / LK`（源码级支持 Java / C / C++ / Python / JavaScript）
 - 类图级 OO 度量（`.xml` / `.oom`）
@@ -147,6 +147,7 @@ scripts/README.md
 - `cfg_demo.json`
 - `cfg_demo.mmd`
 - `cfg_demo.dot`
+- `cfg_demo.oom`
 
 ## 协作与提交
 

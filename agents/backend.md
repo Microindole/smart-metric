@@ -60,7 +60,7 @@ app.register_blueprint(<blueprint>)
 backend/routes/metrics_45.py
   功能点度量
   控制流图源码分析
-  控制流图导入
+  控制流图导入（JSON / Mermaid / DOT / OOM / XML）
 
 backend/routes/metrics_oo_estimate.py
   面向对象 CK/LK 度量

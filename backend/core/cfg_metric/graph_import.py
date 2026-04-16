@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import xml.etree.ElementTree as ET
 from collections import defaultdict, deque
 from typing import Dict, Iterable, List, Set, Tuple
 
@@ -15,6 +16,8 @@ def analyze_imported_graph(content: bytes, filename: str) -> Dict:
         nodes, edges = parse_mermaid_graph(text)
     elif fmt == "dot":
         nodes, edges = parse_dot_graph(text)
+    elif fmt == "xml":
+        nodes, edges = parse_xml_graph(text)
     else:
         raise ValueError(f"暂不支持的控制流图格式: {filename}")
 
@@ -43,6 +46,8 @@ def detect_graph_format(filename: str, text: str) -> str:
     stripped = text.lstrip()
     if lower.endswith(".json") or stripped.startswith("{"):
         return "json"
+    if lower.endswith((".oom", ".xml")) or stripped.startswith("<"):
+        return "xml"
     if lower.endswith((".mmd", ".mermaid")) or stripped.startswith("flowchart") or stripped.startswith("graph"):
         return "mermaid"
     if lower.endswith(".dot") or stripped.startswith("digraph") or stripped.startswith("graph"):
@@ -125,6 +130,65 @@ def parse_dot_graph(text: str) -> Tuple[Set[str], Set[Tuple[str, str]]]:
     return nodes, edges
 
 
+def parse_xml_graph(text: str) -> Tuple[Set[str], Set[Tuple[str, str]]]:
+    root = ET.fromstring(sanitize_xml_prefixes(text))
+    nodes: Dict[str, str] = {}
+    edges: Set[Tuple[str, str]] = set()
+
+    for node in root.iter():
+        tag = _local_name(node.tag)
+        kind = normalized_tag_name(tag)
+        attrs = {str(k).lower(): str(v) for k, v in node.attrib.items()}
+        node_id = (attrs.get("id") or "").strip()
+        name = (attrs.get("name") or attrs.get("code") or node_id).strip()
+        signature = " ".join([kind, attrs.get("xmi:type", ""), attrs.get("type", ""), name]).lower()
+
+        if is_cfg_node(kind, signature) and "ref" not in attrs and (node_id or name):
+            if not node_id:
+                node_id = name or f"node_{id(node)}"
+            nodes[node_id] = name or node_id
+
+        if is_cfg_edge(kind, signature):
+            src = (attrs.get("source") or attrs.get("from") or attrs.get("client") or "").strip()
+            dst = (attrs.get("target") or attrs.get("to") or attrs.get("supplier") or "").strip()
+            if src and dst:
+                nodes.setdefault(src, src)
+                nodes.setdefault(dst, dst)
+                edges.add((src, dst))
+                continue
+
+            src, dst = parse_embedded_flow(node)
+            if src and dst:
+                nodes.setdefault(src, src)
+                nodes.setdefault(dst, dst)
+                edges.add((src, dst))
+
+    return set(nodes.keys()), edges
+
+
+def is_cfg_node(kind: str, signature: str) -> bool:
+    return kind in {"activity", "decision", "start", "end", "initial", "final", "merge", "fork", "join"}
+
+
+def is_cfg_edge(kind: str, signature: str) -> bool:
+    return kind in {"activityflow", "controlflow", "transition", "edge"}
+
+
+def parse_embedded_flow(node: ET.Element) -> Tuple[str, str]:
+    refs: List[str] = []
+    for child in node.iter():
+        tag = _local_name(child.tag)
+        if tag in {"object1", "object2"}:
+            continue
+        attrs = {str(k).lower(): str(v) for k, v in child.attrib.items()}
+        ref = (attrs.get("ref") or attrs.get("idref") or "").strip()
+        if ref:
+            refs.append(ref)
+    if len(refs) >= 2:
+        return refs[0], refs[1]
+    return "", ""
+
+
 def connected_components(nodes: Iterable[str], edges: Iterable[Tuple[str, str]]) -> int:
     node_set = set(nodes)
     if not node_set:
@@ -168,3 +232,21 @@ def _decode_bytes(content: bytes) -> str:
         except UnicodeDecodeError:
             continue
     raise ValueError("文件编码无法识别")
+
+
+def _local_name(tag: str) -> str:
+    if "}" in tag:
+        return tag.split("}", 1)[1].lower()
+    if ":" in tag:
+        return tag.split(":", 1)[1].lower()
+    return tag.lower()
+
+
+def normalized_tag_name(tag: str) -> str:
+    return tag.split("_")[-1].lower()
+
+
+def sanitize_xml_prefixes(text: str) -> str:
+    text = re.sub(r"<(/?)([A-Za-z_]\w*):", r"<\1\2_", text)
+    text = re.sub(r"\s([A-Za-z_]\w*):([A-Za-z_]\w*)=", r" \1_\2=", text)
+    return text

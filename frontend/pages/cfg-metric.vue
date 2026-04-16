@@ -25,9 +25,9 @@
         </a-space>
       </a-card>
 
-      <a-card v-else title="控制流图文件导入（JSON/Mermaid/DOT）">
+      <a-card v-else title="控制流图文件导入（JSON/Mermaid/DOT/OOM/XML）">
         <a-space direction="vertical" style="width: 100%">
-          <input type="file" accept=".json,.mmd,.mermaid,.dot" @change="onGraphSelected" />
+          <input type="file" accept=".json,.mmd,.mermaid,.dot,.oom,.xml" @change="onGraphSelected" />
           <a-space>
             <a-button type="primary" :loading="graphLoading" @click="importGraph">导入并计算</a-button>
           </a-space>

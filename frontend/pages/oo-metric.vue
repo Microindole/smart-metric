@@ -48,6 +48,7 @@ import { computed, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const mode = ref('source')
 const selectedFiles = ref([])
@@ -123,6 +124,25 @@ const analyze = async () => {
     const { data } = await api.post('/api/metrics/oo/calculate', formData)
     rows.value = data.data.classes
     Object.assign(summary, data.data.summary)
+    saveMetricSnapshot('oo', {
+      description: '基于多语言源码进行 CK/LK 与结构指标分析。',
+      summary: {
+        类数: data.data.summary.class_count,
+        方法数: data.data.summary.total_methods,
+        属性数: data.data.summary.total_attributes,
+        平均WMC: data.data.summary.average_wmc,
+        最大DIT: data.data.summary.max_dit,
+        最大CBO: data.data.summary.max_cbo,
+      },
+      rows: (data.data.classes || []).map((item) => ({
+        文件名: item.filename,
+        类名: item.class_name,
+        语言: item.language,
+        WMC: item.ck?.wmc,
+        DIT: item.ck?.dit,
+        CBO: item.ck?.cbo,
+      })),
+    })
     message.success('源码度量完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '分析失败')
@@ -143,6 +163,24 @@ const analyzeDiagram = async () => {
     const { data } = await api.post('/api/metrics/oo/diagram-calculate', formData)
     rows.value = data.data.classes
     Object.assign(summary, data.data.summary)
+    saveMetricSnapshot('oo', {
+      description: '基于类图文件进行类图级面向对象度量。',
+      summary: {
+        类数: data.data.summary.class_count,
+        方法数: data.data.summary.total_methods,
+        属性数: data.data.summary.total_attributes,
+        最大DIT: data.data.summary.max_dit,
+        最大CBO: data.data.summary.max_cbo,
+        关系数: data.data.summary.relation_count,
+      },
+      rows: (data.data.classes || []).map((item) => ({
+        文件名: item.filename,
+        类名: item.class_name,
+        DIT: item.diagram_ck?.dit,
+        NOC: item.diagram_ck?.noc,
+        CBO: item.diagram_ck?.cbo,
+      })),
+    })
     message.success('类图级面向对象度量完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '类图分析失败')

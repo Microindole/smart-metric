@@ -66,6 +66,16 @@ npm run dev:fast -- --host 127.0.0.1 --port 3000
 /report-export
 ```
 
+报告导出页手动验证：
+
+```text
+1. 先在任一度量页面完成一次计算
+2. 进入 /report-export
+3. 勾选要参与汇总的模块
+4. 点击“自动汇总已保存结果”
+5. 导出 markdown/html/pdf
+```
+
 ## 样例文件
 
 ```text

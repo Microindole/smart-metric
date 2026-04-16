@@ -30,6 +30,8 @@ frontend/pages/estimate-metric.vue
 frontend/pages/report-export.vue
 ```
 
+`report-export.vue` 当前支持从前端本地已保存的度量结果自动汇总，并可勾选参与汇总的模块，不再要求手工编写完整 JSON。
+
 菜单入口：
 
 ```text

@@ -63,6 +63,7 @@ import { reactive, ref, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const loading = ref(false)
 const form = reactive({
@@ -94,6 +95,27 @@ const calculate = async () => {
   try {
     const { data } = await api.post('/api/metrics/estimate/calculate', { ...form })
     Object.assign(result, data.data)
+    saveMetricSnapshot('estimate', {
+      description: '基于已有度量结果进行工作量、成本、工期与人员估算。',
+      summary: {
+        度量来源: form.metric_type,
+        度量值: form.metric_value,
+        工作量小时: data.data.effort_hours,
+        成本: data.data.cost,
+        工期月: data.data.duration_months,
+        建议人数: data.data.recommended_people,
+      },
+      rows: [
+        {
+          度量来源: form.metric_type,
+          度量值: form.metric_value,
+          工作量小时: data.data.effort_hours,
+          工作量人月: data.data.effort_person_months,
+          成本: data.data.cost,
+          工期月: data.data.duration_months,
+        },
+      ],
+    })
     message.success('估算完成')
   } catch (err) {
     message.error(err?.response?.data?.message || '估算失败')

@@ -37,11 +37,23 @@
       </a-card>
 
       <a-card title="操作">
+        <a-space direction="vertical" style="width: 100%">
+          <div class="field-label">参与自动汇总的模块</div>
+          <a-checkbox-group v-model:value="selectedModules" :options="moduleOptions" />
+        </a-space>
         <a-space wrap>
+          <a-button type="primary" ghost @click="loadAggregated">自动汇总已保存结果</a-button>
           <a-button @click="loadSample">加载示例</a-button>
+          <a-button danger ghost @click="clearSaved">清空本地结果缓存</a-button>
           <a-button @click="resetForm">清空</a-button>
           <a-button type="primary" :loading="loading" @click="exportReport">导出报告</a-button>
         </a-space>
+        <div v-if="snapshotInfo.length" class="hint" style="margin-top: 10px">
+          已检测到 {{ snapshotInfo.length }} 个模块结果：{{ snapshotInfo.map((item) => item.key).join('、') }}
+        </div>
+        <div v-else class="hint" style="margin-top: 10px">
+          当前还没有可自动汇总的模块结果。请先在各度量页面完成计算。
+        </div>
       </a-card>
 
       <a-card title="预览">
@@ -56,10 +68,11 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
+import { buildReportPayloadFromSnapshots, clearMetricSnapshots, loadMetricSnapshots, moduleTitle } from '~/utils/reportDraft'
 
 const SAMPLE = {
   title: 'SmartMetric 示例报告',
@@ -89,6 +102,8 @@ const SAMPLE = {
 
 const loading = ref(false)
 const format = ref('markdown')
+const snapshotInfo = ref([])
+const selectedModules = ref([])
 const form = reactive({
   title: 'SmartMetric 示例报告',
   subtitle: '用于验证 Markdown / HTML / PDF 导出',
@@ -97,8 +112,28 @@ const summaryText = ref(JSON.stringify(SAMPLE.summary, null, 2))
 const sectionsText = ref(JSON.stringify(SAMPLE.sections, null, 2))
 
 const previewText = computed(() => {
-  return JSON.stringify(buildPayload(), null, 2)
+  try {
+    return JSON.stringify(buildPayload(), null, 2)
+  } catch (err) {
+    return `JSON 解析失败：${err?.message || '未知错误'}`
+  }
 })
+
+const moduleOptions = computed(() =>
+  snapshotInfo.value.map((item) => ({
+    label: moduleTitle(item.key),
+    value: item.key,
+  }))
+)
+
+const refreshSnapshots = () => {
+  const snapshots = loadMetricSnapshots()
+  snapshotInfo.value = Object.entries(snapshots).map(([key, value]) => ({
+    key,
+    updatedAt: value.updatedAt || '',
+  }))
+  selectedModules.value = snapshotInfo.value.map((item) => item.key)
+}
 
 const loadSample = () => {
   form.title = SAMPLE.title
@@ -106,6 +141,23 @@ const loadSample = () => {
   summaryText.value = JSON.stringify(SAMPLE.summary, null, 2)
   sectionsText.value = JSON.stringify(SAMPLE.sections, null, 2)
   message.success('已加载示例报告')
+}
+
+const loadAggregated = () => {
+  const aggregated = buildReportPayloadFromSnapshots(loadMetricSnapshots(), selectedModules.value)
+  form.title = aggregated.title
+  form.subtitle = aggregated.subtitle
+  summaryText.value = JSON.stringify(aggregated.summary, null, 2)
+  sectionsText.value = JSON.stringify(aggregated.sections, null, 2)
+  refreshSnapshots()
+  message.success('已从各模块结果自动汇总报告')
+}
+
+const clearSaved = () => {
+  clearMetricSnapshots()
+  snapshotInfo.value = []
+  selectedModules.value = []
+  message.success('已清空前端本地保存的度量结果')
 }
 
 const resetForm = () => {
@@ -160,6 +212,13 @@ const extension = (value) => {
   if (value === 'markdown') return 'md'
   return value
 }
+
+onMounted(() => {
+  refreshSnapshots()
+  if (snapshotInfo.value.length) {
+    loadAggregated()
+  }
+})
 </script>
 
 <style scoped>

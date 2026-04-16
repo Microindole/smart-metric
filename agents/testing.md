@@ -80,6 +80,7 @@ python backend/cli.py --help
 python backend/cli.py --lang en --help
 python backend/cli.py serve --host 127.0.0.1 --port 5000
 python backend/cli.py oo-source samples/oo_demo.java
+python backend/cli.py oo-source --language python samples/sample_script.py
 python backend/cli.py oo-diagram samples/class_diagram_demo.xml
 python backend/cli.py cfg-graph samples/cfg_demo.json
 ```

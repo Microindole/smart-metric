@@ -147,7 +147,17 @@ backend/core/cfg_metric/strategies/factory.py
 backend/core/oo_metric/
 ```
 
-当前仅支持 Java 源码。输出 CK 指标：
+当前源码级度量采用策略模式，支持：
+
+```text
+Java
+C
+C++
+Python
+JavaScript
+```
+
+输出 CK 指标：
 
 ```text
 WMC
@@ -173,6 +183,12 @@ avg_method_complexity
 
 ```text
 backend/core/class_diagram_metric/
+```
+
+源码级策略位置：
+
+```text
+backend/core/oo_metric/strategies/
 ```
 
 ## 后端测试

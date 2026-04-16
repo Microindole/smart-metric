@@ -33,10 +33,13 @@
     },
     "oo-source": {
       "path": "oo-source",
-      "summary": "从 Java 源码计算 CK/LK",
-      "usage": "python backend\\cli.py oo-source <files...>",
+      "summary": "从多语言源码计算 CK/LK/结构指标",
+      "usage": "python backend\\cli.py oo-source <files...> [--language LANG]",
       "arguments": {
-        "files": "一个或多个 Java 源码路径"
+        "files": "一个或多个源码路径"
+      },
+      "options": {
+        "--language": "可选语言，支持 auto/java/c/cpp/python/javascript"
       }
     },
     "oo-diagram": {

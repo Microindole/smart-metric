@@ -135,8 +135,8 @@ avg_method_complexity
 当前支持：
 
 ```text
-Java 源码
-轻量类结构分析
+Java / C / C++ / Python / JavaScript 源码
+策略模式
 ```
 
 另外已支持类图级 OO 度量：

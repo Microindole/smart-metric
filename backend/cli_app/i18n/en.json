@@ -33,10 +33,13 @@
     },
     "oo-source": {
       "path": "oo-source",
-      "summary": "Calculate CK/LK metrics from Java source files",
-      "usage": "python backend\\cli.py oo-source <files...>",
+      "summary": "Calculate CK/LK and structural metrics from multi-language source files",
+      "usage": "python backend\\cli.py oo-source <files...> [--language LANG]",
       "arguments": {
-        "files": "One or more Java source file paths"
+        "files": "One or more source file paths"
+      },
+      "options": {
+        "--language": "Optional language: auto/java/c/cpp/python/javascript"
       }
     },
     "oo-diagram": {

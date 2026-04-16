@@ -4,17 +4,17 @@ from typing import Iterable
 
 from core.loc_metric.service import _decode_bytes
 
-from .java_analyzer import analyze_java_source
+from .strategies import create_source_analyzer, detect_source_language
 
 
-def analyze_oo_files(files: Iterable[dict]) -> dict:
+def analyze_oo_files(files: Iterable[dict], language: str | None = None) -> dict:
     classes = []
     for item in files:
         filename = item["filename"]
-        if not filename.lower().endswith(".java"):
-            raise ValueError(f"面向对象 CK/LK 度量当前仅支持 Java 源码: {filename}")
         text = _decode_bytes(item["content"])
-        classes.extend(analyze_java_source(filename, text))
+        detected = detect_source_language(filename, language)
+        analyzer = create_source_analyzer(detected)
+        classes.extend(analyzer.analyze(filename, text))
 
     if not classes:
         return {"classes": [], "summary": {"class_count": 0}}

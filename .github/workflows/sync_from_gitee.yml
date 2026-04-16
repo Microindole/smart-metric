@@ -22,8 +22,9 @@ jobs:
           git config --global user.email "action@github.com"
           
           git remote add upstream https://gitee.com/hidyouth/smart-metric.git
-          
           git fetch upstream
+          
           git checkout master
-          git merge upstream/master --allow-unrelated-histories
+          git merge upstream/master --allow-unrelated-histories -m "chore: sync from gitee"
+
           git push origin master

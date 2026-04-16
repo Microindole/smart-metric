@@ -5,6 +5,7 @@ from flask_cors import CORS
 
 from core.diagram_parser import parse_usecase_diagram
 from core.export_service import export_rows_to_csv
+from core.report_export import export_report
 from core.loc_metric import analyze_files
 from core.samples import list_samples, read_sample
 from core.usecase_metric.defaults import EF_DEFAULT_FACTORS, TCF_DEFAULT_FACTORS
@@ -97,6 +98,30 @@ def export_csv():
         return fail(str(exc), 422)
 
 
+@app.post("/api/export/report")
+def export_metric_report():
+    try:
+        payload = request.get_json(silent=True) or {}
+        report_payload = payload.get("report") or payload
+        fmt = payload.get("format") or report_payload.get("format") or "markdown"
+        filename = payload.get("filename") or report_payload.get("filename") or f"smartmetric-report.{extension_for_format(fmt)}"
+
+        content = export_report(report_payload, fmt)
+        if not content:
+            return fail("无可导出的报告内容")
+
+        from io import BytesIO
+
+        return send_file(
+            BytesIO(content),
+            mimetype=mimetype_for_format(fmt),
+            as_attachment=True,
+            download_name=filename,
+        )
+    except Exception as exc:
+        return fail(str(exc), 422)
+
+
 @app.get("/api/samples")
 def samples():
     return ok({"items": list_samples()})
@@ -111,6 +136,28 @@ def get_sample(sample_name: str):
         return send_file(BytesIO(content), as_attachment=True, download_name=name)
     except Exception as exc:
         return fail(str(exc), 404)
+
+
+def mimetype_for_format(fmt: str) -> str:
+    lower = fmt.lower()
+    if lower == "markdown":
+        return "text/markdown; charset=utf-8"
+    if lower == "html":
+        return "text/html; charset=utf-8"
+    if lower == "pdf":
+        return "application/pdf"
+    return "application/octet-stream"
+
+
+def extension_for_format(fmt: str) -> str:
+    lower = fmt.lower()
+    if lower == "markdown":
+        return "md"
+    if lower == "html":
+        return "html"
+    if lower == "pdf":
+        return "pdf"
+    return lower
 
 
 if __name__ == "__main__":

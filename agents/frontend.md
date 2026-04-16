@@ -27,6 +27,7 @@ frontend/pages/function-point.vue
 frontend/pages/cfg-metric.vue
 frontend/pages/oo-metric.vue
 frontend/pages/estimate-metric.vue
+frontend/pages/report-export.vue
 ```
 
 菜单入口：
@@ -37,25 +38,17 @@ frontend/components/AppLayout.vue
 
 新增页面后，如果需要显示在侧边栏，只改 `AppLayout.vue` 中对应菜单项。
 
-## 首页跳转注意
+## 首页策略
 
-`frontend/pages/index.vue` 曾因顶层：
+当前首页 `frontend/pages/index.vue` 不再自动跳转，而是直接展示模块入口。
 
-```js
-await navigateTo('/usecase-metric')
-```
+原因：
 
-导致根路径 `/` 在 dev server 下请求挂住。
+- 减少首屏阻塞
+- 避免页面一进来就依赖后端接口
+- 降低“3000 端口很久没反应”的体感问题
 
-正确写法是客户端挂载后跳转：
-
-```js
-onMounted(() => {
-  navigateTo('/usecase-metric')
-})
-```
-
-不要恢复成顶层 await。
+不要恢复成首页自动跳转。
 
 ## Nuxt 卡住排查
 

@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
@@ -187,7 +187,6 @@ const exportResult = async () => {
   }
 }
 
-onMounted(loadSampleFactors)
 </script>
 
 <style scoped>

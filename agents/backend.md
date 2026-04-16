@@ -72,9 +72,11 @@ backend/routes/metrics_oo_estimate.py
 
 ```text
 javalang
+reportlab
 ```
 
 用途：Java 控制流图 AST 策略。
+`reportlab` 用于 PDF 报告导出。
 
 ## 当前核心模块
 
@@ -117,6 +119,14 @@ CLI 设计要求：
 命令模式：backend/cli_app/commands/*.py
 帮助资源外置：backend/cli_app/i18n/*.json
 命令逻辑复用：backend/core/*
+```
+
+报告导出：
+
+```text
+backend/core/report_export.py
+/api/export/report
+backend/cli.py report
 ```
 
 ## 多语言控制流设计

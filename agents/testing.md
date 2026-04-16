@@ -10,6 +10,12 @@
 .\.venv\Scripts\python.exe -m unittest tests.test_45_metrics tests.test_oo_estimate_metrics
 ```
 
+报告导出测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_report_export
+```
+
 统一自动化入口：
 
 ```powershell
@@ -57,6 +63,7 @@ npm run dev:fast -- --host 127.0.0.1 --port 3000
 /cfg-metric
 /oo-metric
 /estimate-metric
+/report-export
 ```
 
 ## 样例文件
@@ -72,6 +79,7 @@ samples/cfg_demo.json
 samples/cfg_demo.mmd
 samples/cfg_demo.dot
 samples/cfg_demo.oom
+samples/report_demo.json
 ```
 
 CLI 验证示例：
@@ -85,6 +93,8 @@ python backend/cli.py oo-source --language python samples/sample_script.py
 python backend/cli.py oo-diagram samples/class_diagram_demo.xml
 python backend/cli.py cfg-graph samples/cfg_demo.json
 python backend/cli.py cfg-graph samples/cfg_demo.oom
+python backend/cli.py report samples/report_demo.json --format markdown
+python backend/cli.py report samples/report_demo.json --format pdf
 ```
 
 自动化测试脚本示例：

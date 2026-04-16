@@ -13,6 +13,7 @@ SmartMetric 是一个前后端分离的软件度量自动化工具，用于支�
 - 类图级 OO 度量（`.xml` / `.oom`）
 - 项目工作量 / 成本 / 工期 / 人员估算
 - CSV 导出
+- Markdown / HTML / PDF 报告导出
 - 根目录自动化测试脚本
 
 ## 目录结构
@@ -59,6 +60,17 @@ npm run dev
 http://127.0.0.1:3000
 ```
 
+前端页面包括：
+
+- `/`
+- `/usecase-metric`
+- `/loc-metric`
+- `/function-point`
+- `/oo-metric`
+- `/cfg-metric`
+- `/estimate-metric`
+- `/report-export`
+
 ### 3. CLI 入口
 
 查看帮助：
@@ -95,6 +107,8 @@ CLI 计算示例：
 python backend\cli.py oo-source samples\oo_demo.java
 python backend\cli.py oo-diagram samples\class_diagram_demo.xml
 python backend\cli.py cfg-graph samples\cfg_demo.json
+python backend\cli.py report samples\report_demo.json --format markdown
+python backend\cli.py report samples\report_demo.json --format pdf
 ```
 
 ## 自动化测试
@@ -133,6 +147,7 @@ scripts/README.md
 - `POST /api/metrics/oo/diagram-calculate`
 - `POST /api/metrics/estimate/calculate`
 - `POST /api/export`
+- `POST /api/export/report`
 
 ## 样例文件
 
@@ -148,6 +163,7 @@ scripts/README.md
 - `cfg_demo.mmd`
 - `cfg_demo.dot`
 - `cfg_demo.oom`
+- `report_demo.json`
 
 ## 协作与提交
 

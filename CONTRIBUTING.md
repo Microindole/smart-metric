@@ -77,6 +77,14 @@ python backend\cli.py test backend --suite all --start-server
 python backend\cli.py test path <文件路径>
 ```
 
+报告导出：
+
+```powershell
+python backend\cli.py report samples\report_demo.json --format markdown
+python backend\cli.py report samples\report_demo.json --format html
+python backend\cli.py report samples\report_demo.json --format pdf
+```
+
 ## 自动化测试
 
 推荐统一入口：

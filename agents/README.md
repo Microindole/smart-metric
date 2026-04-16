@@ -68,6 +68,7 @@ SmartMetric 是前后端分离的软件度量自动化工具。
 CSV 导出
 CLI 调用入口
 根目录 scripts 自动化测试
+Markdown/HTML/PDF 报告导出
 ```
 
 技术栈：

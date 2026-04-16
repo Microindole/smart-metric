@@ -15,6 +15,7 @@
     "oo-source": "Calculate CK/LK metrics from Java source files",
     "oo-diagram": "Calculate diagram-level OO metrics from XML/OOM class diagrams",
     "fp": "Calculate function points from a JSON file",
+    "report": "Export a Markdown/HTML/PDF report",
     "cfg-source": "Generate control flow metrics from source files",
     "cfg-graph": "Calculate complexity from a structured control flow graph",
     "estimate": "Run project estimation",
@@ -56,6 +57,18 @@
       "usage": "python backend\\cli.py fp <file>",
       "arguments": {
         "file": "Function point JSON input path"
+      }
+    },
+    "report": {
+      "path": "report",
+      "summary": "Export a Markdown/HTML/PDF report",
+      "usage": "python backend\\cli.py report <file> [--format markdown|html|pdf] [--output PATH]",
+      "arguments": {
+        "file": "Report JSON input path"
+      },
+      "options": {
+        "--format": "Report format: markdown/html/pdf",
+        "--output": "Output file path"
       }
     },
     "cfg-source": {

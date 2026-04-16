@@ -1,0 +1,25 @@
+{
+  "title": "SmartMetric 示例报告",
+  "subtitle": "用于验证 Markdown / HTML / PDF 导出",
+  "summary": {
+    "模块": "控制流图度量",
+    "文件数": 1,
+    "最大圈复杂度": 2
+  },
+  "sections": [
+    {
+      "heading": "结果说明",
+      "text": "该报告演示如何从统一数据结构导出多种格式。"
+    },
+    {
+      "heading": "文件级结果",
+      "rows": [
+        {
+          "filename": "cfg_demo.oom",
+          "language": "xml",
+          "cyclomatic_complexity": 2
+        }
+      ]
+    }
+  ]
+}

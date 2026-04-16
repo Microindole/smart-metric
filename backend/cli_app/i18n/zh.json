@@ -15,6 +15,7 @@
     "oo-source": "从 Java 源码计算 CK/LK",
     "oo-diagram": "从类图 XML/OOM 计算类图级 OO 指标",
     "fp": "从 JSON 文件计算功能点",
+    "report": "导出 Markdown/HTML/PDF 报告",
     "cfg-source": "从源码生成控制流图/圈复杂度",
     "cfg-graph": "导入结构化控制流图计算圈复杂度",
     "estimate": "项目估算",
@@ -56,6 +57,18 @@
       "usage": "python backend\\cli.py fp <file>",
       "arguments": {
         "file": "功能点输入 JSON 路径"
+      }
+    },
+    "report": {
+      "path": "report",
+      "summary": "导出 Markdown/HTML/PDF 报告",
+      "usage": "python backend\\cli.py report <file> [--format markdown|html|pdf] [--output PATH]",
+      "arguments": {
+        "file": "报告 JSON 输入路径"
+      },
+      "options": {
+        "--format": "报告格式：markdown/html/pdf",
+        "--output": "输出文件路径"
       }
     },
     "cfg-source": {

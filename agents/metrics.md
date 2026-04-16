@@ -218,7 +218,25 @@ test path
 oo-source
 oo-diagram
 fp
+report
 cfg-source
 cfg-graph
 estimate
+```
+
+## 报告导出
+
+位置：
+
+```text
+backend/core/report_export.py
+```
+
+职责：
+
+```text
+统一报告数据结构
+导出 Markdown
+导出 HTML
+导出 PDF
 ```

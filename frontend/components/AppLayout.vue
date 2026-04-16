@@ -12,6 +12,7 @@
         <a-menu-item key="oo" @click="$router.push('/oo-metric')">面向对象度量</a-menu-item>
         <a-menu-item key="cfg" @click="$router.push('/cfg-metric')">控制流图度量</a-menu-item>
         <a-menu-item key="estimate" @click="$router.push('/estimate-metric')">项目估算</a-menu-item>
+        <a-menu-item key="report" @click="$router.push('/report-export')">报告导出</a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

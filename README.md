@@ -74,6 +74,7 @@ http://127.0.0.1:3000
 - `/function-point`
 - `/oo-metric`
 - `/cfg-metric`
+- `/project-metric`
 - `/estimate-metric`
 - `/report-export`
 
@@ -100,6 +101,7 @@ python backend\cli.py test path samples\class_diagram_demo.xml
 python backend\cli.py test path samples\cfg_demo.json
 python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
 python backend\cli.py project-scan D:\works\smart-metric
+python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
 ```
 
 通过 CLI 启动后端：
@@ -118,6 +120,11 @@ python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc
 python backend\cli.py report samples\report_demo.json --format markdown
 python backend\cli.py report samples\report_demo.json --format pdf
 ```
+
+项目扫描忽略配置：
+
+- CLI：`--ignore-dir <目录名>` 可重复传入，`--ignore-glob <通配规则>` 可重复传入，`--no-default-ignore` 可关闭默认忽略目录。
+- Web：打开 `/project-metric`，填写项目路径后，在“忽略目录”和“忽略通配规则”文本框中按行配置。
 
 ## 自动化测试
 

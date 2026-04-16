@@ -67,6 +67,7 @@ npm run dev:fast -- --host 127.0.0.1 --port 3000
 /loc-metric
 /function-point
 /cfg-metric
+/project-metric
 /oo-metric
 /estimate-metric
 /report-export
@@ -110,6 +111,7 @@ python backend/cli.py oo-diagram samples/class_diagram_demo.xml
 python backend/cli.py cfg-graph samples/cfg_demo.json
 python backend/cli.py cfg-graph samples/cfg_demo.oom
 python backend/cli.py project-scan D:\works\smart-metric
+python backend/cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
 python backend/cli.py report samples/report_demo.json --format markdown
 python backend/cli.py report samples/report_demo.json --format pdf
 ```

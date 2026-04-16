@@ -229,6 +229,14 @@ oo
 design
 ```
 
+忽略规则：
+
+```text
+默认忽略 .git/.venv/node_modules/.nuxt/.output/dist/build 等目录
+可追加目录名忽略和 glob 通配忽略
+目录扫描不会自动推导 FP 或估算输入
+```
+
 说明：
 
 ```text

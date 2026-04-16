@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import fnmatch
 import json
 import re
 from collections import Counter, defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Iterable, List
 
@@ -49,15 +51,33 @@ IGNORED_DIRS = {
 }
 
 
-def analyze_project_directory(root_path: str, modules: Iterable[str] | None = None) -> dict:
+@dataclass(frozen=True)
+class ProjectScanOptions:
+    use_default_ignores: bool = True
+    ignore_dirs: tuple[str, ...] = ()
+    ignore_globs: tuple[str, ...] = ()
+
+
+def analyze_project_directory(
+    root_path: str,
+    modules: Iterable[str] | None = None,
+    options: ProjectScanOptions | dict | None = None,
+) -> dict:
     root = Path(root_path).resolve()
     if not root.exists() or not root.is_dir():
         raise ValueError(f"项目目录不存在: {root}")
 
     requested = set(modules or {"inventory", "loc", "dependency", "oo", "design"})
-    inventory = scan_inventory(root)
+    scan_options = normalize_options(options)
+    inventory = scan_inventory(root, scan_options)
     result = {
         "root": str(root),
+        "scan_options": {
+            "use_default_ignores": scan_options.use_default_ignores,
+            "ignore_dirs": list(scan_options.ignore_dirs),
+            "ignore_globs": list(scan_options.ignore_globs),
+            "effective_ignore_dirs": sorted(effective_ignored_dirs(scan_options)),
+        },
         "inventory": inventory,
         "summary": {
             "total_files": inventory["total_files"],
@@ -97,7 +117,20 @@ def analyze_project_directory(root_path: str, modules: Iterable[str] | None = No
     return result
 
 
-def scan_inventory(root: Path) -> dict:
+def normalize_options(options: ProjectScanOptions | dict | None) -> ProjectScanOptions:
+    if isinstance(options, ProjectScanOptions):
+        return options
+    raw = options or {}
+    ignore_dirs = tuple(normalize_dir_name(item) for item in raw.get("ignore_dirs", []) if normalize_dir_name(item))
+    ignore_globs = tuple(normalize_glob(item) for item in raw.get("ignore_globs", []) if normalize_glob(item))
+    return ProjectScanOptions(
+        use_default_ignores=bool(raw.get("use_default_ignores", True)),
+        ignore_dirs=ignore_dirs,
+        ignore_globs=ignore_globs,
+    )
+
+
+def scan_inventory(root: Path, options: ProjectScanOptions) -> dict:
     code_files: List[Path] = []
     design_files: List[Path] = []
     design_kinds = Counter()
@@ -106,7 +139,7 @@ def scan_inventory(root: Path) -> dict:
     for path in root.rglob("*"):
         if not path.is_file():
             continue
-        if any(part in IGNORED_DIRS for part in path.parts):
+        if should_ignore_path(path, root, options):
             continue
         total_files += 1
         lower = path.suffix.lower()
@@ -127,6 +160,38 @@ def scan_inventory(root: Path) -> dict:
         "design_files": [{"path": str(path), "kind": classify_design_file(path)} for path in design_files],
         "design_breakdown": dict(design_kinds),
     }
+
+
+def should_ignore_path(path: Path, root: Path, options: ProjectScanOptions) -> bool:
+    relative = path.relative_to(root)
+    ignored_dirs = effective_ignored_dirs(options)
+    if any(part in ignored_dirs for part in relative.parts[:-1]):
+        return True
+
+    patterns = options.ignore_globs
+    if not patterns:
+        return False
+
+    relative_text = str(relative).replace("\\", "/")
+    basename = path.name
+    for pattern in patterns:
+        if fnmatch.fnmatch(relative_text, pattern) or fnmatch.fnmatch(basename, pattern):
+            return True
+    return False
+
+
+def effective_ignored_dirs(options: ProjectScanOptions) -> set[str]:
+    base = set(IGNORED_DIRS) if options.use_default_ignores else set()
+    base.update(options.ignore_dirs)
+    return base
+
+
+def normalize_dir_name(value: str) -> str:
+    return str(value or "").strip().strip("/\\")
+
+
+def normalize_glob(value: str) -> str:
+    return str(value or "").strip()
 
 
 def classify_design_file(path: Path) -> str:

@@ -112,6 +112,7 @@ python backend\cli.py serve --host 127.0.0.1 --port 5000
 ```powershell
 python backend\cli.py project-scan D:\works\smart-metric
 python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
+python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
 ```
 
 并支持统一测试入口：
@@ -152,6 +153,14 @@ backend/cli.py project-scan
 分析源码依赖关系
 排查上帝文件与上帝类
 清点并分析用例图/类图/控制流图设计文件
+```
+
+忽略配置：
+
+```text
+默认忽略 .git/.venv/node_modules/.nuxt/.output/dist/build 等目录
+CLI 可追加 --ignore-dir 和 --ignore-glob
+后端 API: POST /api/metrics/project/scan
 ```
 
 ## 多语言控制流设计

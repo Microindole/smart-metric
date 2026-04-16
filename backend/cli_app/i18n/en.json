@@ -68,7 +68,10 @@
         "path": "Project root directory path"
       },
       "options": {
-        "--modules": "Optional modules: inventory, loc, dependency, oo, design"
+        "--modules": "Optional modules: inventory, loc, dependency, oo, design",
+        "--ignore-dir": "Append an ignored directory name; repeatable",
+        "--ignore-glob": "Append an ignored glob pattern; repeatable",
+        "--no-default-ignore": "Disable the built-in ignored directory set"
       }
     },
     "report": {

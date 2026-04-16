@@ -68,7 +68,10 @@
         "path": "项目根目录路径"
       },
       "options": {
-        "--modules": "可选模块列表：inventory、loc、dependency、oo、design"
+        "--modules": "可选模块列表：inventory、loc、dependency、oo、design",
+        "--ignore-dir": "追加忽略目录名，可重复传入",
+        "--ignore-glob": "追加忽略通配规则，可重复传入",
+        "--no-default-ignore": "关闭默认忽略目录集合"
       }
     },
     "report": {

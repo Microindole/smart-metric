@@ -82,6 +82,7 @@ python backend\cli.py test path <文件路径>
 ```powershell
 python backend\cli.py project-scan <项目目录>
 python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
+python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
 ```
 
 报告导出：

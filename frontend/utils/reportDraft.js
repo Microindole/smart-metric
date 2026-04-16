@@ -56,6 +56,7 @@ export const moduleTitle = (key) => {
     function_point: '功能点度量',
     cfg: '控制流图度量',
     oo: '面向对象度量',
+    project: '项目扫描',
     estimate: '项目估算',
   }
   return titles[key] || key

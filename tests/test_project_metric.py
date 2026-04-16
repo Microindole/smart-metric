@@ -14,10 +14,14 @@ BACKEND = ROOT / "backend"
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
 
-from core.project_metric import analyze_project_directory  # noqa: E402
+from app import app  # noqa: E402
+from core.project_metric import ProjectScanOptions, analyze_project_directory  # noqa: E402
 
 
 class ProjectMetricTests(unittest.TestCase):
+    def setUp(self):
+        self.client = app.test_client()
+
     def test_analyzes_project_directory_with_code_and_design_artifacts(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -73,6 +77,25 @@ class ProjectMetricTests(unittest.TestCase):
             cfg_metrics = result["design"]["cfg_graphs"][0]
             self.assertIn("cyclomatic_complexity", cfg_metrics)
 
+    def test_honors_custom_ignore_rules(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "src").mkdir()
+            (root / "coverage").mkdir()
+            (root / "src" / "main.py").write_text("print('main')\n", encoding="utf-8")
+            (root / "coverage" / "report.py").write_text("print('coverage')\n", encoding="utf-8")
+            (root / "ignore_me.py").write_text("print('ignore')\n", encoding="utf-8")
+
+            result = analyze_project_directory(
+                str(root),
+                ["inventory", "loc"],
+                ProjectScanOptions(ignore_dirs=("coverage",), ignore_globs=("ignore_*.py",)),
+            )
+
+            files = {Path(item).name for item in result["inventory"]["code_files"]}
+            self.assertEqual(files, {"main.py"})
+            self.assertIn("coverage", result["scan_options"]["effective_ignore_dirs"])
+
     def test_cli_project_scan(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -96,6 +119,58 @@ class ProjectMetricTests(unittest.TestCase):
             payload = json.loads(completed.stdout)
             self.assertEqual(payload["summary"]["code_file_count"], 1)
             self.assertEqual(payload["summary"]["total_lines"], 1)
+
+    def test_cli_project_scan_supports_ignore_args(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "dist").mkdir()
+            (root / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            (root / "dist" / "bundle.py").write_text("print('skip')\n", encoding="utf-8")
+            (root / "skip.generated.py").write_text("print('skip')\n", encoding="utf-8")
+
+            completed = subprocess.run(
+                [
+                    str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                    str(ROOT / "backend" / "cli.py"),
+                    "project-scan",
+                    str(root),
+                    "--modules",
+                    "inventory,loc",
+                    "--ignore-dir",
+                    "dist",
+                    "--ignore-glob",
+                    "*.generated.py",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+            )
+
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["summary"]["code_file_count"], 1)
+            self.assertEqual(payload["scan_options"]["ignore_globs"], ["*.generated.py"])
+
+    def test_project_scan_api_supports_ignore_rules(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "coverage").mkdir()
+            (root / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            (root / "coverage" / "skip.py").write_text("print('skip')\n", encoding="utf-8")
+
+            response = self.client.post(
+                "/api/metrics/project/scan",
+                json={
+                    "path": str(root),
+                    "modules": ["inventory", "loc"],
+                    "ignore_dirs": ["coverage"],
+                },
+            )
+
+            self.assertEqual(response.status_code, 200)
+            payload = response.get_json()["data"]
+            self.assertEqual(payload["summary"]["code_file_count"], 1)
+            self.assertIn("coverage", payload["scan_options"]["effective_ignore_dirs"])
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ const items = [
   { path: '/function-point', title: '功能点度量', text: 'EI / EO / EQ / ILF / EIF' },
   { path: '/oo-metric', title: '面向对象度量', text: '源码级与类图级 CK / LK' },
   { path: '/cfg-metric', title: '控制流图度量', text: '源码分析与图导入' },
+  { path: '/project-metric', title: '项目扫描', text: '目录级代码量、依赖与上帝文件排查' },
   { path: '/estimate-metric', title: '项目估算', text: '工作量 / 成本 / 工期 / 人员' },
   { path: '/report-export', title: '报告导出', text: 'Markdown / HTML / PDF' },
 ]

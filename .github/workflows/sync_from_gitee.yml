@@ -25,6 +25,6 @@ jobs:
           git fetch upstream
           
           git checkout master
-          git merge upstream/master --allow-unrelated-histories -m "chore: sync from gitee"
+          git rebase upstream/master --allow-unrelated-histories -m "chore: sync from gitee"
 
           git push origin master

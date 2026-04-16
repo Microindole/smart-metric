@@ -200,6 +200,42 @@ UCP
 LoC
 ```
 
+## 项目目录级扫描
+
+位置：
+
+```text
+backend/core/project_metric/
+backend/cli.py project-scan
+```
+
+职责：
+
+```text
+递归扫描项目目录
+统计总代码量、各文件 LoC、语言分布
+提取源码依赖关系
+排查上帝文件与上帝类
+自动识别并分析用例图、类图、控制流图设计文件
+```
+
+当前默认模块：
+
+```text
+inventory
+loc
+dependency
+oo
+design
+```
+
+说明：
+
+```text
+功能点 FP 和项目估算仍然依赖用户输入，不会仅凭目录扫描自动推导。
+项目目录级扫描用于汇总代码/设计资产，并复用已有度量模块。
+```
+
 ## CLI
 
 CLI 入口：
@@ -222,6 +258,7 @@ report
 cfg-source
 cfg-graph
 estimate
+project-scan
 ```
 
 ## 报告导出

@@ -12,9 +12,10 @@
   },
   "root_commands": {
     "serve": "启动 SmartMetric 后端服务",
-    "oo-source": "从 Java 源码计算 CK/LK",
+    "oo-source": "从多语言源码计算 CK/LK",
     "oo-diagram": "从类图 XML/OOM 计算类图级 OO 指标",
     "fp": "从 JSON 文件计算功能点",
+    "project-scan": "按项目目录汇总代码、依赖、设计图与上帝文件",
     "report": "导出 Markdown/HTML/PDF 报告",
     "cfg-source": "从源码生成控制流图/圈复杂度",
     "cfg-graph": "导入结构化控制流图计算圈复杂度",
@@ -57,6 +58,17 @@
       "usage": "python backend\\cli.py fp <file>",
       "arguments": {
         "file": "功能点输入 JSON 路径"
+      }
+    },
+    "project-scan": {
+      "path": "project-scan",
+      "summary": "按项目目录汇总代码、依赖、设计图与上帝文件",
+      "usage": "python backend\\cli.py project-scan <path> [--modules inventory,loc,dependency,oo,design]",
+      "arguments": {
+        "path": "项目根目录路径"
+      },
+      "options": {
+        "--modules": "可选模块列表：inventory、loc、dependency、oo、design"
       }
     },
     "report": {

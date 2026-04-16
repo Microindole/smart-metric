@@ -64,6 +64,7 @@ SmartMetric 是前后端分离的软件度量自动化工具。
 功能点 FP
 控制流图/圈复杂度
 面向对象 CK/LK
+项目目录级扫描（代码量、依赖、设计图、上帝文件）
 项目工作量/成本/工期/人员估算
 CSV 导出
 CLI 调用入口
@@ -167,6 +168,7 @@ python backend\cli.py serve --host 127.0.0.1 --port 5000
 ```powershell
 python backend\cli.py test backend --suite all --start-server
 python backend\cli.py test path samples\class_diagram_demo.xml
+python backend\cli.py project-scan D:\works\smart-metric
 ```
 
 ## 开发原则
@@ -190,6 +192,7 @@ UCP                 backend/core/usecase_metric/
 FP                  backend/core/function_point_metric/
 CFG/圈复杂度         backend/core/cfg_metric/
 CK/LK               backend/core/oo_metric/
+项目目录级扫描       backend/core/project_metric/
 估算                backend/core/estimate_metric/
 UML/OOM 解析         backend/core/diagram_parser/
 类图级 OO            backend/core/class_diagram_metric/

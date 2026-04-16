@@ -11,10 +11,16 @@ SmartMetric 是一个前后端分离的软件度量自动化工具，用于支�
 - 源码控制流分析（Java / Python / C / C++）
 - 面向对象度量 `CK / LK`（源码级支持 Java / C / C++ / Python / JavaScript）
 - 类图级 OO 度量（`.xml` / `.oom`）
+- 项目目录级扫描（总代码量、各文件 LoC、依赖关系、设计图清点、上帝文件/类排查）
 - 项目工作量 / 成本 / 工期 / 人员估算
 - CSV 导出
 - Markdown / HTML / PDF 报告导出（支持从前端已保存度量结果自动汇总，并可选择参与汇总的模块）
 - 根目录自动化测试脚本
+
+说明：
+
+- 项目目录级扫描会自动汇总代码文件和设计图，并复用已有 LoC / CFG / 用例图 / 类图 / OO 模块。
+- 功能点与项目估算仍属于用户输入驱动模块，不会仅凭目录自动推导。
 
 ## 目录结构
 
@@ -93,6 +99,7 @@ python backend\cli.py test backend --suite all --start-server
 python backend\cli.py test path samples\class_diagram_demo.xml
 python backend\cli.py test path samples\cfg_demo.json
 python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
+python backend\cli.py project-scan D:\works\smart-metric
 ```
 
 通过 CLI 启动后端：
@@ -107,6 +114,7 @@ CLI 计算示例：
 python backend\cli.py oo-source samples\oo_demo.java
 python backend\cli.py oo-diagram samples\class_diagram_demo.xml
 python backend\cli.py cfg-graph samples\cfg_demo.json
+python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
 python backend\cli.py report samples\report_demo.json --format markdown
 python backend\cli.py report samples\report_demo.json --format pdf
 ```
@@ -128,9 +136,7 @@ python backend\cli.py report samples\report_demo.json --format pdf
 
 说明见：
 
-```text
-scripts/README.md
-```
+[scripts/README.md](./scripts/README.md)
 
 ## 核心接口
 
@@ -169,15 +175,12 @@ scripts/README.md
 
 请先阅读：
 
-```text
-CONTRIBUTING.md
-```
+[CONTRIBUTING.md](./CONTRIBUTING.md)
 
 如果是 agent 接手仓库，还要先读：
 
-```text
-AGENTS.md
-```
+[AGENTS.md](./AGENTS.md)
+
 
 
 ## License

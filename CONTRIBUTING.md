@@ -77,6 +77,13 @@ python backend\cli.py test backend --suite all --start-server
 python backend\cli.py test path <文件路径>
 ```
 
+项目目录级扫描：
+
+```powershell
+python backend\cli.py project-scan <项目目录>
+python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
+```
+
 报告导出：
 
 ```powershell

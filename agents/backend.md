@@ -89,6 +89,7 @@ backend/core/oo_metric/
 backend/core/estimate_metric/
 backend/core/diagram_parser/
 backend/core/class_diagram_metric/
+backend/core/project_metric/
 ```
 
 CLI 入口：
@@ -104,6 +105,13 @@ CLI 不替代 Web，但属于正式入口之一。新增度量模块时，如果
 
 ```powershell
 python backend\cli.py serve --host 127.0.0.1 --port 5000
+```
+
+项目目录级扫描：
+
+```powershell
+python backend\cli.py project-scan D:\works\smart-metric
+python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
 ```
 
 并支持统一测试入口：
@@ -127,6 +135,23 @@ CLI 设计要求：
 backend/core/report_export.py
 /api/export/report
 backend/cli.py report
+```
+
+项目目录级扫描模块：
+
+```text
+backend/core/project_metric/
+backend/cli.py project-scan
+```
+
+职责：
+
+```text
+递归扫描项目目录
+统计总代码量与各文件 LoC
+分析源码依赖关系
+排查上帝文件与上帝类
+清点并分析用例图/类图/控制流图设计文件
 ```
 
 ## 多语言控制流设计

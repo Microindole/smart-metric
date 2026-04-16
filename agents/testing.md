@@ -16,6 +16,12 @@
 .\.venv\Scripts\python.exe -m unittest tests.test_report_export
 ```
 
+项目目录级扫描测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_project_metric
+```
+
 统一自动化入口：
 
 ```powershell
@@ -103,6 +109,7 @@ python backend/cli.py oo-source --language python samples/sample_script.py
 python backend/cli.py oo-diagram samples/class_diagram_demo.xml
 python backend/cli.py cfg-graph samples/cfg_demo.json
 python backend/cli.py cfg-graph samples/cfg_demo.oom
+python backend/cli.py project-scan D:\works\smart-metric
 python backend/cli.py report samples/report_demo.json --format markdown
 python backend/cli.py report samples/report_demo.json --format pdf
 ```

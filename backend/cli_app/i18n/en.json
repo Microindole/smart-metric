@@ -12,9 +12,10 @@
   },
   "root_commands": {
     "serve": "Start the SmartMetric backend service",
-    "oo-source": "Calculate CK/LK metrics from Java source files",
+    "oo-source": "Calculate CK/LK metrics from multi-language source files",
     "oo-diagram": "Calculate diagram-level OO metrics from XML/OOM class diagrams",
     "fp": "Calculate function points from a JSON file",
+    "project-scan": "Scan a project directory for code volume, dependencies, diagrams, and god files",
     "report": "Export a Markdown/HTML/PDF report",
     "cfg-source": "Generate control flow metrics from source files",
     "cfg-graph": "Calculate complexity from a structured control flow graph",
@@ -57,6 +58,17 @@
       "usage": "python backend\\cli.py fp <file>",
       "arguments": {
         "file": "Function point JSON input path"
+      }
+    },
+    "project-scan": {
+      "path": "project-scan",
+      "summary": "Scan a project directory for code volume, dependencies, diagrams, and god files",
+      "usage": "python backend\\cli.py project-scan <path> [--modules inventory,loc,dependency,oo,design]",
+      "arguments": {
+        "path": "Project root directory path"
+      },
+      "options": {
+        "--modules": "Optional modules: inventory, loc, dependency, oo, design"
       }
     },
     "report": {

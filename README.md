@@ -2,25 +2,10 @@
 
 SmartMetric 是一个前后端分离的软件度量自动化工具，用于支撑软件度量课程实验。当前仓库已经覆盖需求/设计/代码阶段的一组核心度量能力，并同时提供 Web 端与 CLI 端入口。
 
-## 当前已实现
+功能清单、模块覆盖范围和能力说明已经提取到：
 
-- 用例点度量 `UUC / UAW / TCF / EF / UCP`
-- 代码行度量 `LoC`
-- 功能点度量 `FP`
-- 控制流图导入与圈复杂度度量（支持 JSON / Mermaid / DOT / OOM / XML）
-- 源码控制流分析（Java / Python / C / C++）
-- 面向对象度量 `CK / LK`（源码级支持 Java / C / C++ / Python / JavaScript）
-- 类图级 OO 度量（`.xml` / `.oom`）
-- 项目目录级扫描（总代码量、各文件 LoC、依赖关系、设计图清点、上帝文件/类排查）
-- 项目工作量 / 成本 / 工期 / 人员估算
-- CSV 导出
-- Markdown / HTML / PDF 报告导出（支持从前端已保存度量结果自动汇总，并可选择参与汇总的模块）
-- 根目录自动化测试脚本
-
-说明：
-
-- 项目目录级扫描会自动汇总代码文件和设计图，并复用已有 LoC / CFG / 用例图 / 类图 / OO 模块。
-- 功能点与项目估算仍属于用户输入驱动模块，不会仅凭目录自动推导。
+- [docs/06-功能清单.md](D:/works/smart-metric/docs/06-功能清单.md)
+- [docs/README.md](D:/works/smart-metric/docs/README.md)
 
 ## 目录结构
 
@@ -100,8 +85,13 @@ python backend\cli.py test backend --suite all --start-server
 python backend\cli.py test path samples\class_diagram_demo.xml
 python backend\cli.py test path samples\cfg_demo.json
 python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
+python backend\cli.py tp samples\cfg_demo.json
+python backend\cli.py tb --suite unit
 python backend\cli.py project-scan D:\works\smart-metric
+python backend\cli.py project-report D:\works\smart-metric -F pdf
 python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
+python backend\cli.py project-scan D:\works\smart-metric -m inventory,loc,oo -d coverage -g *.generated.py
+python backend\cli.py ps D:\works\smart-metric -m inventory,loc
 ```
 
 通过 CLI 启动后端：
@@ -116,7 +106,10 @@ CLI 计算示例：
 python backend\cli.py oo-source samples\oo_demo.java
 python backend\cli.py oo-diagram samples\class_diagram_demo.xml
 python backend\cli.py cfg-graph samples\cfg_demo.json
+python backend\cli.py oos samples\oo_demo.java
+python backend\cli.py cfg samples\cfg_demo.json
 python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
+python backend\cli.py project-report D:\works\smart-metric -F pdf -o smartmetric-report.pdf -P fp.json -E estimate.json
 python backend\cli.py report samples\report_demo.json --format markdown
 python backend\cli.py report samples\report_demo.json --format pdf
 ```
@@ -124,7 +117,18 @@ python backend\cli.py report samples\report_demo.json --format pdf
 项目扫描忽略配置：
 
 - CLI：`--ignore-dir <目录名>` 可重复传入，`--ignore-glob <通配规则>` 可重复传入，`--no-default-ignore` 可关闭默认忽略目录。
-- Web：打开 `/project-metric`，填写项目路径后，在“忽略目录”和“忽略通配规则”文本框中按行配置。
+- CLI：`--ignore-file <文件名>` 可指定忽略文件名，`--no-ignore-file` 可关闭忽略文件读取。
+- Web：打开 `/project-metric`，填写项目路径后，在“忽略目录”和“忽略通配规则”文本框中按行配置，也会自动读取项目根目录下的 `.smartmetricignore`。
+
+`.smartmetricignore`：
+
+- 默认文件名是项目根目录下的 `.smartmetricignore`
+- 空行和 `#` 开头的行会忽略
+- 常用语义尽量对齐 `.gitignore`
+- 纯名称按目录名规则处理，例如 `coverage`
+- 带通配符或路径的规则按 glob 处理，例如 `*.generated.py`、`frontend/dist/*`
+- `!` 可用于反向包含，例如 `!/logs/keep.py`
+- `/` 开头表示相对项目根目录，例如 `/logs/`
 
 ## 自动化测试
 

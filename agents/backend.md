@@ -128,6 +128,10 @@ CLI 设计要求：
 命令模式：backend/cli_app/commands/*.py
 帮助资源外置：backend/cli_app/i18n/*.json
 命令逻辑复用：backend/core/*
+命令需同时保留长命令和短别名
+常用选项需同时保留长参数和短参数（如 -L/-l/-m/-o/-H/-p/-s）
+根帮助仅展示主命令，短别名单独下一行展示
+help/help -a 作为正式命令存在，交互终端下帮助输出支持分页
 ```
 
 报告导出：
@@ -143,6 +147,7 @@ backend/cli.py report
 ```text
 backend/core/project_metric/
 backend/cli.py project-scan
+backend/cli.py project-report
 ```
 
 职责：
@@ -153,13 +158,17 @@ backend/cli.py project-scan
 分析源码依赖关系
 排查上帝文件与上帝类
 清点并分析用例图/类图/控制流图设计文件
+构建项目级总报告并导出 markdown/html/pdf
 ```
 
 忽略配置：
 
 ```text
 默认忽略 .git/.venv/node_modules/.nuxt/.output/dist/build 等目录
+自动读取项目根目录 .smartmetricignore
 CLI 可追加 --ignore-dir 和 --ignore-glob
+CLI 可通过 --ignore-file 指定文件名，或 --no-ignore-file 关闭
+CLI 同时提供短参数 -m/-d/-g/-f/-G/-D
 后端 API: POST /api/metrics/project/scan
 ```
 

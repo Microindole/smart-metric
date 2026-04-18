@@ -34,6 +34,7 @@ frontend/pages/report-export.vue
 `report-export.vue` 当前支持从前端本地已保存的度量结果自动汇总，并可勾选参与汇总的模块，不再要求手工编写完整 JSON。
 
 `project-metric.vue` 当前支持输入项目目录路径，配置默认忽略、自定义忽略目录、自定义忽略通配规则，并调用后端项目扫描接口。
+同时支持自动读取项目根目录 `.smartmetricignore`，并展示实际生效的忽略规则。
 
 菜单入口：
 

@@ -4,44 +4,73 @@
     "description": "SmartMetric command line entry",
     "usage_label": "Usage",
     "commands_label": "Commands",
+    "all_commands_label": "All commands",
     "arguments_label": "Arguments",
     "options_label": "Options",
+    "aliases_label": "Aliases",
     "lang_option": "Help language (zh/en)",
     "help_option": "Show help information",
-    "usage": "python backend\\cli.py [--lang zh|en] <command> [options]"
+    "usage": "python backend\\cli.py [-L zh|en] <command> [options]"
   },
   "root_commands": {
+    "help": "Show help information, optionally with -a for all commands",
     "serve": "Start the SmartMetric backend service",
     "oo-source": "Calculate CK/LK metrics from multi-language source files",
     "oo-diagram": "Calculate diagram-level OO metrics from XML/OOM class diagrams",
     "fp": "Calculate function points from a JSON file",
     "project-scan": "Scan a project directory for code volume, dependencies, diagrams, and god files",
+    "project-report": "Scan a project and export a full report (including PDF)",
     "report": "Export a Markdown/HTML/PDF report",
     "cfg-source": "Generate control flow metrics from source files",
     "cfg-graph": "Calculate complexity from a structured control flow graph",
     "estimate": "Run project estimation",
-    "test": "Unified testing entry"
+    "test": "Unified testing entry (for example tb/tp)"
+  },
+  "root_aliases": {
+    "help": ["h"],
+    "serve": ["srv", "sv"],
+    "oo-source": ["oos"],
+    "oo-diagram": ["ood"],
+    "fp": ["function-point", "fpm"],
+    "project-scan": ["ps"],
+    "project-report": ["prj", "preport"],
+    "report": ["rpt", "rep"],
+    "cfg-source": ["cfs"],
+    "cfg-graph": ["cfg", "cfgg"],
+    "estimate": ["est"],
+    "test": ["t"]
   },
   "commands": {
+    "help": {
+      "path": "help",
+      "summary": "Show help information",
+      "usage": "python backend\\cli.py help [-a|--all] [topic...]",
+      "arguments": {
+        "topic": "Optional command path, for example serve or test backend"
+      },
+      "options": {
+        "-a, --all": "Show all command summaries and page them in an interactive terminal"
+      }
+    },
     "serve": {
       "path": "serve",
       "summary": "Start the SmartMetric backend service",
-      "usage": "python backend\\cli.py serve [--host HOST] [--port PORT] [--debug]",
+      "usage": "python backend\\cli.py serve [-H HOST] [-p PORT] [-d]",
       "options": {
-        "--host": "Bind host, default 127.0.0.1",
-        "--port": "Bind port, default 5000",
-        "--debug": "Enable Flask debug mode"
+        "-H, --host": "Bind host, default 127.0.0.1",
+        "-p, --port": "Bind port, default 5000",
+        "-d, --debug": "Enable Flask debug mode"
       }
     },
     "oo-source": {
       "path": "oo-source",
       "summary": "Calculate CK/LK and structural metrics from multi-language source files",
-      "usage": "python backend\\cli.py oo-source <files...> [--language LANG]",
+      "usage": "python backend\\cli.py oo-source <files...> [-l LANG]",
       "arguments": {
         "files": "One or more source file paths"
       },
       "options": {
-        "--language": "Optional language: auto/java/c/cpp/python/javascript"
+        "-l, --language": "Optional language: auto/java/c/cpp/python/javascript"
       }
     },
     "oo-diagram": {
@@ -68,33 +97,57 @@
         "path": "Project root directory path"
       },
       "options": {
-        "--modules": "Optional modules: inventory, loc, dependency, oo, design",
-        "--ignore-dir": "Append an ignored directory name; repeatable",
-        "--ignore-glob": "Append an ignored glob pattern; repeatable",
-        "--no-default-ignore": "Disable the built-in ignored directory set"
+        "-m, --modules": "Optional modules: inventory, loc, dependency, oo, design",
+        "-d, --ignore-dir": "Append an ignored directory name; repeatable",
+        "-g, --ignore-glob": "Append an ignored glob pattern; repeatable",
+        "-f, --ignore-file": "Ignore file name, default .smartmetricignore",
+        "-G, --no-ignore-file": "Disable reading the project-root ignore file",
+        "-D, --no-default-ignore": "Disable the built-in ignored directory set"
+      }
+    },
+    "project-report": {
+      "path": "project-report",
+      "summary": "Scan a project and export a full report",
+      "usage": "python backend\\cli.py project-report <path> [-m inventory,loc,dependency,oo,design] [-F pdf] [-o PATH] [-P fp.json] [-E estimate.json]",
+      "arguments": {
+        "path": "Project root directory path"
+      },
+      "options": {
+        "-m, --modules": "Optional modules: inventory, loc, dependency, oo, design",
+        "-d, --ignore-dir": "Append an ignored directory name; repeatable",
+        "-g, --ignore-glob": "Append an ignored glob pattern; repeatable",
+        "-f, --ignore-file": "Ignore file name, default .smartmetricignore",
+        "-G, --no-ignore-file": "Disable reading the project-root ignore file",
+        "-D, --no-default-ignore": "Disable the built-in ignored directory set",
+        "-F, --format": "Output format: markdown/html/pdf, default pdf",
+        "-o, --output": "Output file path",
+        "-P, --fp-file": "Function point input JSON path",
+        "-E, --estimate-file": "Estimate input JSON path",
+        "-t, --title": "Report title",
+        "-S, --subtitle": "Report subtitle"
       }
     },
     "report": {
       "path": "report",
       "summary": "Export a Markdown/HTML/PDF report",
-      "usage": "python backend\\cli.py report <file> [--format markdown|html|pdf] [--output PATH]",
+      "usage": "python backend\\cli.py report <file> [-F markdown|html|pdf] [-o PATH]",
       "arguments": {
         "file": "Report JSON input path"
       },
       "options": {
-        "--format": "Report format: markdown/html/pdf",
-        "--output": "Output file path"
+        "-F, --format": "Report format: markdown/html/pdf",
+        "-o, --output": "Output file path"
       }
     },
     "cfg-source": {
       "path": "cfg-source",
       "summary": "Generate control flow metrics from source files",
-      "usage": "python backend\\cli.py cfg-source <files...> [--language LANG]",
+      "usage": "python backend\\cli.py cfg-source <files...> [-l LANG]",
       "arguments": {
         "files": "One or more source file paths"
       },
       "options": {
-        "--language": "Optional language: auto/java/c/cpp/python"
+        "-l, --language": "Optional language: auto/java/c/cpp/python"
       }
     },
     "cfg-graph": {
@@ -116,25 +169,25 @@
     "test.backend": {
       "path": "test backend",
       "summary": "Run backend automation tests",
-      "usage": "python backend\\cli.py test backend [--suite unit|smoke|all] [--start-server] [--base-url URL]",
+      "usage": "python backend\\cli.py test backend [-s unit|smoke|all] [-S] [-u URL] [-H HOST] [-p PORT]",
       "options": {
-        "--suite": "Select suite: unit, smoke, all",
-        "--start-server": "Start local backend before testing",
-        "--base-url": "Base URL when backend is already running",
-        "--host": "Host used when auto-starting backend",
-        "--port": "Port used when auto-starting backend"
+        "-s, --suite": "Select suite: unit, smoke, all",
+        "-S, --start-server": "Start local backend before testing",
+        "-u, --base-url": "Base URL when backend is already running",
+        "-H, --host": "Host used when auto-starting backend",
+        "-p, --port": "Port used when auto-starting backend"
       }
     },
     "test.path": {
       "path": "test path",
       "summary": "Auto-detect and run a metric for a file path",
-      "usage": "python backend\\cli.py test path <path> [--metric METRIC] [--language LANG]",
+      "usage": "python backend\\cli.py test path <path> [-m METRIC] [-l LANG]",
       "arguments": {
         "path": "Path to the input file"
       },
       "options": {
-        "--metric": "Optional metric: auto/cfg-source/cfg-graph/oo-source/oo-diagram/fp/estimate",
-        "--language": "Optional language for source CFG analysis"
+        "-m, --metric": "Optional metric: auto/cfg-source/cfg-graph/oo-source/oo-diagram/fp/estimate",
+        "-l, --language": "Optional language for source CFG analysis"
       }
     }
   }

@@ -14,6 +14,7 @@ class CliContext:
 
 class BaseCommand(ABC):
     path: Tuple[str, ...]
+    aliases: Tuple[Tuple[str, ...], ...] = ()
 
     @property
     def key(self) -> str:

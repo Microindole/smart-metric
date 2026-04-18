@@ -15,6 +15,7 @@ from core.function_point_metric.service import calculate_function_point_metrics 
 
 class FunctionPointCommand(BaseCommand):
     path = ("fp",)
+    aliases = (("function-point",), ("fpm",))
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)

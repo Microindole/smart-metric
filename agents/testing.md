@@ -20,6 +20,7 @@
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest tests.test_project_metric
+.\.venv\Scripts\python.exe -m unittest tests.test_project_report
 ```
 
 统一自动化入口：
@@ -103,7 +104,13 @@ CLI 验证示例：
 
 ```powershell
 python backend/cli.py --help
+python backend/cli.py -L en --help
 python backend/cli.py --lang en --help
+python backend/cli.py help
+python backend/cli.py help -a
+python backend/cli.py ps D:\works\smart-metric -m inventory,loc
+python backend/cli.py tb --suite unit
+python backend/cli.py tp samples/cfg_demo.json
 python backend/cli.py serve --host 127.0.0.1 --port 5000
 python backend/cli.py oo-source samples/oo_demo.java
 python backend/cli.py oo-source --language python samples/sample_script.py
@@ -111,9 +118,23 @@ python backend/cli.py oo-diagram samples/class_diagram_demo.xml
 python backend/cli.py cfg-graph samples/cfg_demo.json
 python backend/cli.py cfg-graph samples/cfg_demo.oom
 python backend/cli.py project-scan D:\works\smart-metric
+python backend/cli.py project-report D:\works\smart-metric -F pdf
 python backend/cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
+python backend/cli.py project-scan D:\works\smart-metric --ignore-file .smartmetricignore
+python backend/cli.py project-scan D:\works\smart-metric -m inventory,loc -d coverage -g *.generated.py
 python backend/cli.py report samples/report_demo.json --format markdown
+python backend/cli.py report samples/report_demo.json -F html -o report.html
 python backend/cli.py report samples/report_demo.json --format pdf
+```
+
+CLI 帮助显示约定：
+
+```text
+根帮助中主命令单独占一行
+短别名单独下一行展示，不使用 serve / srv 这种拼接形式
+子命令帮助中的别名使用 Aliases/别名 区块展示
+help -a 在交互终端中分页显示，Enter 下一页，q 退出
+常用选项同时支持长短参数，测试时优先覆盖一条短参数链路
 ```
 
 自动化测试脚本示例：

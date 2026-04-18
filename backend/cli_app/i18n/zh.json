@@ -4,44 +4,73 @@
     "description": "SmartMetric 命令行入口",
     "usage_label": "用法",
     "commands_label": "命令",
+    "all_commands_label": "全部命令",
     "arguments_label": "参数",
     "options_label": "选项",
+    "aliases_label": "别名",
     "lang_option": "帮助文档语言（zh/en）",
     "help_option": "显示帮助信息",
-    "usage": "python backend\\cli.py [--lang zh|en] <command> [options]"
+    "usage": "python backend\\cli.py [-L zh|en] <command> [options]"
   },
   "root_commands": {
+    "help": "显示帮助信息，可配合 -a 查看全部命令",
     "serve": "启动 SmartMetric 后端服务",
     "oo-source": "从多语言源码计算 CK/LK",
     "oo-diagram": "从类图 XML/OOM 计算类图级 OO 指标",
     "fp": "从 JSON 文件计算功能点",
     "project-scan": "按项目目录汇总代码、依赖、设计图与上帝文件",
+    "project-report": "扫描项目并导出总报告（支持 PDF）",
     "report": "导出 Markdown/HTML/PDF 报告",
     "cfg-source": "从源码生成控制流图/圈复杂度",
     "cfg-graph": "导入结构化控制流图计算圈复杂度",
     "estimate": "项目估算",
-    "test": "统一测试入口"
+    "test": "统一测试入口（如 tb/tp）"
+  },
+  "root_aliases": {
+    "help": ["h"],
+    "serve": ["srv", "sv"],
+    "oo-source": ["oos"],
+    "oo-diagram": ["ood"],
+    "fp": ["function-point", "fpm"],
+    "project-scan": ["ps"],
+    "project-report": ["prj", "preport"],
+    "report": ["rpt", "rep"],
+    "cfg-source": ["cfs"],
+    "cfg-graph": ["cfg", "cfgg"],
+    "estimate": ["est"],
+    "test": ["t"]
   },
   "commands": {
+    "help": {
+      "path": "help",
+      "summary": "显示帮助信息",
+      "usage": "python backend\\cli.py help [-a|--all] [topic...]",
+      "arguments": {
+        "topic": "可选命令路径，例如 serve 或 test backend"
+      },
+      "options": {
+        "-a, --all": "显示全部命令摘要，并在交互终端中分页显示"
+      }
+    },
     "serve": {
       "path": "serve",
       "summary": "启动 SmartMetric 后端服务",
-      "usage": "python backend\\cli.py serve [--host HOST] [--port PORT] [--debug]",
+      "usage": "python backend\\cli.py serve [-H HOST] [-p PORT] [-d]",
       "options": {
-        "--host": "绑定主机地址，默认 127.0.0.1",
-        "--port": "绑定端口，默认 5000",
-        "--debug": "开启 Flask debug 模式"
+        "-H, --host": "绑定主机地址，默认 127.0.0.1",
+        "-p, --port": "绑定端口，默认 5000",
+        "-d, --debug": "开启 Flask debug 模式"
       }
     },
     "oo-source": {
       "path": "oo-source",
       "summary": "从多语言源码计算 CK/LK/结构指标",
-      "usage": "python backend\\cli.py oo-source <files...> [--language LANG]",
+      "usage": "python backend\\cli.py oo-source <files...> [-l LANG]",
       "arguments": {
         "files": "一个或多个源码路径"
       },
       "options": {
-        "--language": "可选语言，支持 auto/java/c/cpp/python/javascript"
+        "-l, --language": "可选语言，支持 auto/java/c/cpp/python/javascript"
       }
     },
     "oo-diagram": {
@@ -68,33 +97,57 @@
         "path": "项目根目录路径"
       },
       "options": {
-        "--modules": "可选模块列表：inventory、loc、dependency、oo、design",
-        "--ignore-dir": "追加忽略目录名，可重复传入",
-        "--ignore-glob": "追加忽略通配规则，可重复传入",
-        "--no-default-ignore": "关闭默认忽略目录集合"
+        "-m, --modules": "可选模块列表：inventory、loc、dependency、oo、design",
+        "-d, --ignore-dir": "追加忽略目录名，可重复传入",
+        "-g, --ignore-glob": "追加忽略通配规则，可重复传入",
+        "-f, --ignore-file": "忽略文件名，默认 .smartmetricignore",
+        "-G, --no-ignore-file": "关闭项目根目录忽略文件读取",
+        "-D, --no-default-ignore": "关闭默认忽略目录集合"
+      }
+    },
+    "project-report": {
+      "path": "project-report",
+      "summary": "扫描项目并导出总报告",
+      "usage": "python backend\\cli.py project-report <path> [-m inventory,loc,dependency,oo,design] [-F pdf] [-o PATH] [-P fp.json] [-E estimate.json]",
+      "arguments": {
+        "path": "项目根目录路径"
+      },
+      "options": {
+        "-m, --modules": "可选模块列表：inventory、loc、dependency、oo、design",
+        "-d, --ignore-dir": "追加忽略目录名，可重复传入",
+        "-g, --ignore-glob": "追加忽略通配规则，可重复传入",
+        "-f, --ignore-file": "忽略文件名，默认 .smartmetricignore",
+        "-G, --no-ignore-file": "关闭项目根目录忽略文件读取",
+        "-D, --no-default-ignore": "关闭默认忽略目录集合",
+        "-F, --format": "输出格式：markdown/html/pdf，默认 pdf",
+        "-o, --output": "输出文件路径",
+        "-P, --fp-file": "功能点输入 JSON 路径",
+        "-E, --estimate-file": "项目估算输入 JSON 路径",
+        "-t, --title": "报告标题",
+        "-S, --subtitle": "报告副标题"
       }
     },
     "report": {
       "path": "report",
       "summary": "导出 Markdown/HTML/PDF 报告",
-      "usage": "python backend\\cli.py report <file> [--format markdown|html|pdf] [--output PATH]",
+      "usage": "python backend\\cli.py report <file> [-F markdown|html|pdf] [-o PATH]",
       "arguments": {
         "file": "报告 JSON 输入路径"
       },
       "options": {
-        "--format": "报告格式：markdown/html/pdf",
-        "--output": "输出文件路径"
+        "-F, --format": "报告格式：markdown/html/pdf",
+        "-o, --output": "输出文件路径"
       }
     },
     "cfg-source": {
       "path": "cfg-source",
       "summary": "从源码生成控制流图/圈复杂度",
-      "usage": "python backend\\cli.py cfg-source <files...> [--language LANG]",
+      "usage": "python backend\\cli.py cfg-source <files...> [-l LANG]",
       "arguments": {
         "files": "一个或多个源码文件路径"
       },
       "options": {
-        "--language": "可选语言，支持 auto/java/c/cpp/python"
+        "-l, --language": "可选语言，支持 auto/java/c/cpp/python"
       }
     },
     "cfg-graph": {
@@ -116,25 +169,25 @@
     "test.backend": {
       "path": "test backend",
       "summary": "运行后端自动化测试",
-      "usage": "python backend\\cli.py test backend [--suite unit|smoke|all] [--start-server] [--base-url URL]",
+      "usage": "python backend\\cli.py test backend [-s unit|smoke|all] [-S] [-u URL] [-H HOST] [-p PORT]",
       "options": {
-        "--suite": "选择测试范围：unit、smoke、all",
-        "--start-server": "测试前自动启动本地后端服务",
-        "--base-url": "已启动后端时的访问地址",
-        "--host": "自动启动服务时绑定的 host",
-        "--port": "自动启动服务时绑定的 port"
+        "-s, --suite": "选择测试范围：unit、smoke、all",
+        "-S, --start-server": "测试前自动启动本地后端服务",
+        "-u, --base-url": "已启动后端时的访问地址",
+        "-H, --host": "自动启动服务时绑定的 host",
+        "-p, --port": "自动启动服务时绑定的 port"
       }
     },
     "test.path": {
       "path": "test path",
       "summary": "按路径自动识别并执行度量",
-      "usage": "python backend\\cli.py test path <path> [--metric METRIC] [--language LANG]",
+      "usage": "python backend\\cli.py test path <path> [-m METRIC] [-l LANG]",
       "arguments": {
         "path": "待分析文件路径"
       },
       "options": {
-        "--metric": "可选 auto/cfg-source/cfg-graph/oo-source/oo-diagram/fp/estimate",
-        "--language": "源码控制流分析时可指定语言"
+        "-m, --metric": "可选 auto/cfg-source/cfg-graph/oo-source/oo-diagram/fp/estimate",
+        "-l, --language": "源码控制流分析时可指定语言"
       }
     }
   }

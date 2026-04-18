@@ -15,6 +15,10 @@ def resolve_lang(argv: list[str]) -> str:
             candidate = argv[index + 1].lower()
             if candidate in SUPPORTED_LANGS:
                 return candidate
+        if token == "-L" and index + 1 < len(argv):
+            candidate = argv[index + 1].lower()
+            if candidate in SUPPORTED_LANGS:
+                return candidate
         if token.startswith("--lang="):
             candidate = token.split("=", 1)[1].lower()
             if candidate in SUPPORTED_LANGS:

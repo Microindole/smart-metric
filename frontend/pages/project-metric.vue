@@ -5,6 +5,8 @@
         <div class="form-grid">
           <a-input v-model:value="projectPath" placeholder="输入项目根目录，例如 D:\\works\\smart-metric" />
           <a-checkbox v-model:checked="useDefaultIgnores">使用默认忽略目录</a-checkbox>
+          <a-checkbox v-model:checked="useIgnoreFile">读取 .smartmetricignore</a-checkbox>
+          <a-input v-model:value="ignoreFileName" placeholder="忽略文件名，默认 .smartmetricignore" />
           <a-checkbox-group v-model:value="modules" :options="moduleOptions" />
           <a-textarea
             v-model:value="ignoreDirsText"
@@ -39,8 +41,13 @@
 
       <a-card title="忽略配置" class="panel-card">
         <div class="effective-line">默认忽略：{{ scanOptions.use_default_ignores ? '开启' : '关闭' }}</div>
+        <div class="effective-line">忽略文件：{{ scanOptions.use_ignore_file ? '开启' : '关闭' }}</div>
+        <div class="effective-line">忽略文件路径：{{ scanOptions.ignore_file_found ? scanOptions.ignore_file_path : '未找到' }}</div>
+        <div class="effective-line">反向包含规则：{{ scanOptions.ignore_file_has_negation ? '有' : '无' }}</div>
+        <div class="effective-line">忽略文件目录规则：{{ formatList(scanOptions.ignore_file_dirs) }}</div>
+        <div class="effective-line">忽略文件通配规则：{{ formatList(scanOptions.ignore_file_globs) }}</div>
         <div class="effective-line">生效目录：{{ formatList(scanOptions.effective_ignore_dirs) }}</div>
-        <div class="effective-line">自定义通配：{{ formatList(scanOptions.ignore_globs) }}</div>
+        <div class="effective-line">生效通配：{{ formatList(scanOptions.effective_ignore_globs) }}</div>
       </a-card>
 
       <a-card title="语言分布" class="panel-card">
@@ -72,6 +79,8 @@ import { saveMetricSnapshot } from '~/utils/reportDraft'
 const loading = ref(false)
 const projectPath = ref('')
 const useDefaultIgnores = ref(true)
+const useIgnoreFile = ref(true)
+const ignoreFileName = ref('.smartmetricignore')
 const modules = ref(['inventory', 'loc', 'dependency', 'oo', 'design'])
 const ignoreDirsText = ref('')
 const ignoreGlobsText = ref('')
@@ -88,9 +97,16 @@ const summary = reactive({
 })
 const scanOptions = reactive({
   use_default_ignores: true,
+  use_ignore_file: true,
+  ignore_file_path: '',
+  ignore_file_found: false,
+  ignore_file_has_negation: false,
+  ignore_file_dirs: [],
+  ignore_file_globs: [],
   ignore_dirs: [],
   ignore_globs: [],
   effective_ignore_dirs: [],
+  effective_ignore_globs: [],
 })
 
 const moduleOptions = [
@@ -164,6 +180,8 @@ const scanProject = async () => {
       path: projectPath.value.trim(),
       modules: modules.value,
       use_default_ignores: useDefaultIgnores.value,
+      use_ignore_file: useIgnoreFile.value,
+      ignore_file_name: ignoreFileName.value.trim() || '.smartmetricignore',
       ignore_dirs: parseLines(ignoreDirsText.value),
       ignore_globs: parseLines(ignoreGlobsText.value),
     }
@@ -180,7 +198,19 @@ const scanProject = async () => {
       god_files: data.data.summary.god_files || 0,
       god_classes: data.data.summary.god_classes || 0,
     })
-    Object.assign(scanOptions, data.data.scan_options || { use_default_ignores: true, ignore_dirs: [], ignore_globs: [], effective_ignore_dirs: [] })
+    Object.assign(scanOptions, data.data.scan_options || {
+      use_default_ignores: true,
+      use_ignore_file: true,
+      ignore_file_path: '',
+      ignore_file_found: false,
+      ignore_file_has_negation: false,
+      ignore_file_dirs: [],
+      ignore_file_globs: [],
+      ignore_dirs: [],
+      ignore_globs: [],
+      effective_ignore_dirs: [],
+      effective_ignore_globs: [],
+    })
     saveMetricSnapshot('project', {
       description: '基于项目目录进行总代码量、依赖关系、设计图和上帝文件排查。',
       summary: {

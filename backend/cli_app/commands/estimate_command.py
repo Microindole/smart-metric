@@ -15,6 +15,7 @@ from core.estimate_metric import calculate_estimate  # noqa: E402
 
 class EstimateCommand(BaseCommand):
     path = ("estimate",)
+    aliases = (("est",),)
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)

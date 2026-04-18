@@ -29,6 +29,8 @@ def scan_project():
             "use_default_ignores": payload.get("use_default_ignores", True),
             "ignore_dirs": payload.get("ignore_dirs") or [],
             "ignore_globs": payload.get("ignore_globs") or [],
+            "use_ignore_file": payload.get("use_ignore_file", True),
+            "ignore_file_name": payload.get("ignore_file_name") or ".smartmetricignore",
         }
         return ok(analyze_project_directory(project_path, modules, options))
     except Exception as exc:

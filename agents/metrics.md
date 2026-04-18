@@ -234,6 +234,8 @@ design
 ```text
 默认忽略 .git/.venv/node_modules/.nuxt/.output/dist/build 等目录
 可追加目录名忽略和 glob 通配忽略
+自动读取项目根目录 .smartmetricignore
+常用语义尽量对齐 .gitignore，支持 # 注释、! 反向包含、/ 根路径规则
 目录扫描不会自动推导 FP 或估算输入
 ```
 

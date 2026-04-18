@@ -13,6 +13,7 @@ from core.class_diagram_metric import analyze_class_diagram_bytes  # noqa: E402
 
 class OoDiagramCommand(BaseCommand):
     path = ("oo-diagram",)
+    aliases = (("ood",),)
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)

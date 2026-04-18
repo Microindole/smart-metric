@@ -56,6 +56,17 @@ class ProjectScanOptions:
     use_default_ignores: bool = True
     ignore_dirs: tuple[str, ...] = ()
     ignore_globs: tuple[str, ...] = ()
+    use_ignore_file: bool = True
+    ignore_file_name: str = ".smartmetricignore"
+
+
+@dataclass(frozen=True)
+class IgnoreRule:
+    pattern: str
+    negate: bool = False
+    directory_only: bool = False
+    anchored: bool = False
+    has_slash: bool = False
 
 
 def analyze_project_directory(
@@ -69,6 +80,7 @@ def analyze_project_directory(
 
     requested = set(modules or {"inventory", "loc", "dependency", "oo", "design"})
     scan_options = normalize_options(options)
+    ignore_file = load_ignore_file(root, scan_options)
     inventory = scan_inventory(root, scan_options)
     result = {
         "root": str(root),
@@ -76,7 +88,15 @@ def analyze_project_directory(
             "use_default_ignores": scan_options.use_default_ignores,
             "ignore_dirs": list(scan_options.ignore_dirs),
             "ignore_globs": list(scan_options.ignore_globs),
-            "effective_ignore_dirs": sorted(effective_ignored_dirs(scan_options)),
+            "use_ignore_file": scan_options.use_ignore_file,
+            "ignore_file_name": scan_options.ignore_file_name,
+            "ignore_file_path": str(ignore_file["path"]) if ignore_file["path"] else "",
+            "ignore_file_found": ignore_file["found"],
+            "ignore_file_dirs": list(ignore_file["ignore_dirs"]),
+            "ignore_file_globs": list(ignore_file["ignore_globs"]),
+            "ignore_file_has_negation": ignore_file["has_negation"],
+            "effective_ignore_dirs": sorted(effective_ignored_dirs(scan_options, ignore_file)),
+            "effective_ignore_globs": sorted(effective_ignore_globs(scan_options, ignore_file)),
         },
         "inventory": inventory,
         "summary": {
@@ -127,10 +147,13 @@ def normalize_options(options: ProjectScanOptions | dict | None) -> ProjectScanO
         use_default_ignores=bool(raw.get("use_default_ignores", True)),
         ignore_dirs=ignore_dirs,
         ignore_globs=ignore_globs,
+        use_ignore_file=bool(raw.get("use_ignore_file", True)),
+        ignore_file_name=str(raw.get("ignore_file_name") or ".smartmetricignore").strip() or ".smartmetricignore",
     )
 
 
 def scan_inventory(root: Path, options: ProjectScanOptions) -> dict:
+    ignore_file = load_ignore_file(root, options)
     code_files: List[Path] = []
     design_files: List[Path] = []
     design_kinds = Counter()
@@ -139,7 +162,7 @@ def scan_inventory(root: Path, options: ProjectScanOptions) -> dict:
     for path in root.rglob("*"):
         if not path.is_file():
             continue
-        if should_ignore_path(path, root, options):
+        if should_ignore_path(path, root, options, ignore_file):
             continue
         total_files += 1
         lower = path.suffix.lower()
@@ -162,27 +185,35 @@ def scan_inventory(root: Path, options: ProjectScanOptions) -> dict:
     }
 
 
-def should_ignore_path(path: Path, root: Path, options: ProjectScanOptions) -> bool:
+def should_ignore_path(path: Path, root: Path, options: ProjectScanOptions, ignore_file: dict | None = None) -> bool:
     relative = path.relative_to(root)
-    ignored_dirs = effective_ignored_dirs(options)
+    ignored_dirs = effective_ignored_dirs(options, ignore_file)
     if any(part in ignored_dirs for part in relative.parts[:-1]):
         return True
 
-    patterns = options.ignore_globs
-    if not patterns:
-        return False
-
+    patterns = effective_ignore_globs(options, ignore_file)
     relative_text = str(relative).replace("\\", "/")
     basename = path.name
-    for pattern in patterns:
-        if fnmatch.fnmatch(relative_text, pattern) or fnmatch.fnmatch(basename, pattern):
-            return True
-    return False
+    if patterns:
+        for pattern in patterns:
+            if fnmatch.fnmatch(relative_text, pattern) or fnmatch.fnmatch(basename, pattern):
+                return True
+
+    return evaluate_ignore_rules(relative, ignore_file.get("rules", ())) if ignore_file else False
 
 
-def effective_ignored_dirs(options: ProjectScanOptions) -> set[str]:
+def effective_ignored_dirs(options: ProjectScanOptions, ignore_file: dict | None = None) -> set[str]:
     base = set(IGNORED_DIRS) if options.use_default_ignores else set()
     base.update(options.ignore_dirs)
+    if ignore_file:
+        base.update(ignore_file.get("ignore_dirs", []))
+    return base
+
+
+def effective_ignore_globs(options: ProjectScanOptions, ignore_file: dict | None = None) -> set[str]:
+    base = set(options.ignore_globs)
+    if ignore_file:
+        base.update(ignore_file.get("ignore_globs", []))
     return base
 
 
@@ -192,6 +223,140 @@ def normalize_dir_name(value: str) -> str:
 
 def normalize_glob(value: str) -> str:
     return str(value or "").strip()
+
+
+def load_ignore_file(root: Path, options: ProjectScanOptions) -> dict:
+    if not options.use_ignore_file:
+        return {"found": False, "path": None, "ignore_dirs": (), "ignore_globs": (), "rules": (), "has_negation": False}
+
+    ignore_path = root / options.ignore_file_name
+    if not ignore_path.exists() or not ignore_path.is_file():
+        return {"found": False, "path": ignore_path, "ignore_dirs": (), "ignore_globs": (), "rules": (), "has_negation": False}
+
+    try:
+        text = ignore_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return {"found": False, "path": ignore_path, "ignore_dirs": (), "ignore_globs": (), "rules": (), "has_negation": False}
+
+    ignore_dirs: list[str] = []
+    ignore_globs: list[str] = []
+    rules: list[IgnoreRule] = []
+    has_negation = False
+    for line in text.splitlines():
+        parsed = parse_ignore_rule(line)
+        if not parsed:
+            continue
+        rules.append(parsed)
+        has_negation = has_negation or parsed.negate
+        if parsed.negate:
+            continue
+        if (
+            not parsed.has_slash
+            and not any(token in parsed.pattern for token in ("*", "?", "[", "]"))
+        ):
+            ignore_dirs.append(parsed.pattern)
+        else:
+            ignore_globs.append(render_rule_pattern(parsed))
+
+    return {
+        "found": True,
+        "path": ignore_path,
+        "ignore_dirs": tuple(dict.fromkeys(ignore_dirs)),
+        "ignore_globs": tuple(dict.fromkeys(ignore_globs)),
+        "rules": tuple(rules),
+        "has_negation": has_negation,
+    }
+
+
+def parse_ignore_rule(line: str) -> IgnoreRule | None:
+    raw = str(line or "").strip()
+    if not raw or raw.startswith("#"):
+        return None
+
+    negate = raw.startswith("!")
+    if negate:
+        raw = raw[1:].strip()
+    if not raw or raw.startswith("#"):
+        return None
+
+    if raw.startswith("dir:"):
+        value = normalize_dir_name(raw[4:])
+        if not value:
+            return None
+        return IgnoreRule(pattern=value, negate=negate, directory_only=True, anchored=False, has_slash=False)
+
+    if raw.startswith("glob:"):
+        value = normalize_glob(raw[5:])
+        return build_ignore_rule(value, negate) if value else None
+
+    return build_ignore_rule(raw, negate)
+
+
+def build_ignore_rule(raw: str, negate: bool) -> IgnoreRule | None:
+    value = raw.replace("\\", "/").strip()
+    if not value:
+        return None
+    anchored = value.startswith("/")
+    slashful = "/" in value
+    if anchored:
+        value = value[1:]
+    directory_only = value.endswith("/")
+    if directory_only:
+        value = value.rstrip("/")
+    value = value.strip()
+    if not value:
+        return None
+    return IgnoreRule(
+        pattern=value,
+        negate=negate,
+        directory_only=directory_only,
+        anchored=anchored,
+        has_slash=slashful,
+    )
+
+
+def render_rule_pattern(rule: IgnoreRule) -> str:
+    prefix = "/" if rule.anchored else ""
+    suffix = "/" if rule.directory_only else ""
+    return f"{prefix}{rule.pattern}{suffix}"
+
+
+def evaluate_ignore_rules(relative: Path, rules: Iterable[IgnoreRule]) -> bool:
+    ignored = False
+    relative_text = str(relative).replace("\\", "/")
+    parents = ["/".join(relative.parts[:index]) for index in range(1, len(relative.parts))]
+    basename = relative.name
+    for rule in rules:
+        if rule_matches(relative_text, basename, parents, rule):
+            ignored = not rule.negate
+    return ignored
+
+
+def rule_matches(relative_text: str, basename: str, parents: list[str], rule: IgnoreRule) -> bool:
+    if rule.directory_only:
+        if rule.has_slash:
+            return match_path_candidates(parents, rule.pattern, rule.anchored)
+        return any(fnmatch.fnmatch(part.split("/")[-1], rule.pattern) for part in parents)
+
+    if not rule.has_slash:
+        if fnmatch.fnmatch(basename, rule.pattern):
+            return True
+        return any(fnmatch.fnmatch(part.split("/")[-1], rule.pattern) for part in parents)
+
+    return match_path_candidates([relative_text], rule.pattern, rule.anchored)
+
+
+def match_path_candidates(candidates: list[str], pattern: str, anchored: bool) -> bool:
+    for candidate in candidates:
+        if anchored:
+            if fnmatch.fnmatch(candidate, pattern):
+                return True
+            continue
+        if fnmatch.fnmatch(candidate, pattern) or fnmatch.fnmatch(candidate, f"*/{pattern}"):
+            return True
+        if candidate.endswith(f"/{pattern}") or candidate == pattern:
+            return True
+    return False
 
 
 def classify_design_file(path: Path) -> str:

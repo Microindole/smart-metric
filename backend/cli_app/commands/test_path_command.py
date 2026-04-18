@@ -8,16 +8,18 @@ from ..services import print_json, run_path_metric
 
 class TestPathCommand(BaseCommand):
     path = ("test", "path")
+    aliases = (("tp",), ("t", "p"), ("t", "path"))
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[-1], add_help=False)
         parser.add_argument("path")
         parser.add_argument(
+            "-m",
             "--metric",
             choices=("auto", "cfg-source", "cfg-graph", "oo-source", "oo-diagram", "fp", "estimate"),
             default="auto",
         )
-        parser.add_argument("--language", default=None)
+        parser.add_argument("-l", "--language", default=None)
         parser.set_defaults(command_key=self.key)
 
     def run(self, args: Namespace, ctx: CliContext) -> int:

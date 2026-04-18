@@ -13,6 +13,7 @@ from core.cfg_metric import analyze_imported_graph  # noqa: E402
 
 class CfgGraphCommand(BaseCommand):
     path = ("cfg-graph",)
+    aliases = (("cfg",), ("cfgg",))
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)

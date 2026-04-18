@@ -9,14 +9,15 @@ from ..runtime import ensure_runtime_paths
 
 class TestBackendCommand(BaseCommand):
     path = ("test", "backend")
+    aliases = (("tb",), ("t", "b"), ("t", "backend"))
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[-1], add_help=False)
-        parser.add_argument("--suite", choices=("unit", "smoke", "all"), default="all")
-        parser.add_argument("--base-url", default="http://127.0.0.1:5000")
-        parser.add_argument("--start-server", action="store_true")
-        parser.add_argument("--host", default="127.0.0.1")
-        parser.add_argument("--port", type=int, default=5000)
+        parser.add_argument("-s", "--suite", choices=("unit", "smoke", "all"), default="all")
+        parser.add_argument("-u", "--base-url", default="http://127.0.0.1:5000")
+        parser.add_argument("-S", "--start-server", action="store_true")
+        parser.add_argument("-H", "--host", default="127.0.0.1")
+        parser.add_argument("-p", "--port", type=int, default=5000)
         parser.set_defaults(command_key=self.key)
 
     def run(self, args: Namespace, ctx: CliContext) -> int:

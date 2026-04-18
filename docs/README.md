@@ -9,6 +9,7 @@
 3. [03-度量模型与算法.md](D:/works/smart-metric/docs/03-度量模型与算法.md)
 4. [04-实现结果与测试.md](D:/works/smart-metric/docs/04-实现结果与测试.md)
 5. [05-分析与改进.md](D:/works/smart-metric/docs/05-分析与改进.md)
+6. [06-功能清单.md](D:/works/smart-metric/docs/06-功能清单.md)
 
 ## 指导书对应关系
 

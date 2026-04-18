@@ -14,12 +14,13 @@ from core.report_export import export_report  # noqa: E402
 
 class ReportCommand(BaseCommand):
     path = ("report",)
+    aliases = (("rpt",), ("rep",))
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)
         parser.add_argument("file", help="报告 JSON 输入路径")
-        parser.add_argument("--format", choices=("markdown", "html", "pdf"), default="markdown")
-        parser.add_argument("--output", default="")
+        parser.add_argument("-F", "--format", choices=("markdown", "html", "pdf"), default="markdown")
+        parser.add_argument("-o", "--output", default="")
         parser.set_defaults(command_key=self.key)
 
     def run(self, args: Namespace, ctx: CliContext) -> int:

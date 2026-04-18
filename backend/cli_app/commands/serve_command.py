@@ -8,12 +8,13 @@ from ..runtime import ensure_runtime_paths
 
 class ServeCommand(BaseCommand):
     path = ("serve",)
+    aliases = (("srv",), ("sv",))
 
     def configure(self, subparsers: _SubParsersAction, ctx: CliContext) -> None:
         parser = subparsers.add_parser(self.path[0], add_help=False)
-        parser.add_argument("--host", default="127.0.0.1")
-        parser.add_argument("--port", type=int, default=5000)
-        parser.add_argument("--debug", action="store_true")
+        parser.add_argument("-H", "--host", default="127.0.0.1")
+        parser.add_argument("-p", "--port", type=int, default=5000)
+        parser.add_argument("-d", "--debug", action="store_true")
         parser.set_defaults(command_key=self.key)
 
     def run(self, args: Namespace, ctx: CliContext) -> int:

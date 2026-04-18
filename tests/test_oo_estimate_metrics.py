@@ -249,7 +249,7 @@ class CliTests(unittest.TestCase):
 
     def test_cli_help_supports_english_catalog(self):
         completed = subprocess.run(
-            [str(ROOT / ".venv" / "Scripts" / "python.exe"), str(ROOT / "backend" / "cli.py"), "--lang", "en", "--help"],
+            [str(ROOT / ".venv" / "Scripts" / "python.exe"), str(ROOT / "backend" / "cli.py"), "-L", "en", "--help"],
             check=True,
             capture_output=True,
             text=True,
@@ -274,6 +274,27 @@ class CliTests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertEqual(payload["effort_hours"], 80)
         payload_path.unlink(missing_ok=True)
+
+    def test_cli_test_path_supports_short_options(self):
+        completed = subprocess.run(
+            [
+                str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                str(ROOT / "backend" / "cli.py"),
+                "test",
+                "path",
+                str(ROOT / "samples" / "sample_script.py"),
+                "-m",
+                "oo-source",
+                "-l",
+                "python",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["summary"]["class_count"], 1)
 
 
 if __name__ == "__main__":

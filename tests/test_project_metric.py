@@ -96,6 +96,43 @@ class ProjectMetricTests(unittest.TestCase):
             self.assertEqual(files, {"main.py"})
             self.assertIn("coverage", result["scan_options"]["effective_ignore_dirs"])
 
+    def test_reads_smartmetricignore_from_project_root(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "coverage").mkdir()
+            (root / "src").mkdir()
+            (root / "src" / "main.py").write_text("print('main')\n", encoding="utf-8")
+            (root / "coverage" / "skip.py").write_text("print('skip')\n", encoding="utf-8")
+            (root / "skip.generated.py").write_text("print('skip')\n", encoding="utf-8")
+            (root / ".smartmetricignore").write_text("coverage\n*.generated.py\n", encoding="utf-8")
+
+            result = analyze_project_directory(str(root), ["inventory", "loc"])
+
+            files = {Path(item).name for item in result["inventory"]["code_files"]}
+            self.assertEqual(files, {"main.py"})
+            self.assertTrue(result["scan_options"]["ignore_file_found"])
+            self.assertIn("coverage", result["scan_options"]["ignore_file_dirs"])
+            self.assertIn("*.generated.py", result["scan_options"]["effective_ignore_globs"])
+
+    def test_smartmetricignore_supports_gitignore_like_negation_and_root_paths(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "logs").mkdir()
+            (root / "logs" / "keep.py").write_text("print('keep')\n", encoding="utf-8")
+            (root / "logs" / "drop.py").write_text("print('drop')\n", encoding="utf-8")
+            (root / "nested").mkdir()
+            (root / "nested" / "logs").mkdir()
+            (root / "nested" / "logs" / "nested.py").write_text("print('nested')\n", encoding="utf-8")
+            (root / ".smartmetricignore").write_text("/logs/\n!/logs/keep.py\n", encoding="utf-8")
+
+            result = analyze_project_directory(str(root), ["inventory", "loc"])
+
+            files = {str(Path(item).relative_to(root)).replace("\\", "/") for item in result["inventory"]["code_files"]}
+            self.assertIn("logs/keep.py", files)
+            self.assertNotIn("logs/drop.py", files)
+            self.assertIn("nested/logs/nested.py", files)
+            self.assertTrue(result["scan_options"]["ignore_file_has_negation"])
+
     def test_cli_project_scan(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -119,6 +156,157 @@ class ProjectMetricTests(unittest.TestCase):
             payload = json.loads(completed.stdout)
             self.assertEqual(payload["summary"]["code_file_count"], 1)
             self.assertEqual(payload["summary"]["total_lines"], 1)
+
+    def test_cli_project_scan_supports_short_flags(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "coverage").mkdir()
+            (root / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            (root / "coverage" / "skip.py").write_text("print('skip')\n", encoding="utf-8")
+            (root / "drop.generated.py").write_text("print('skip')\n", encoding="utf-8")
+
+            completed = subprocess.run(
+                [
+                    str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                    str(ROOT / "backend" / "cli.py"),
+                    "project-scan",
+                    str(root),
+                    "-m",
+                    "inventory,loc",
+                    "-d",
+                    "coverage",
+                    "-g",
+                    "*.generated.py",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+            )
+
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["summary"]["code_file_count"], 1)
+
+    def test_cli_project_scan_supports_command_alias(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "main.py").write_text("print('ok')\n", encoding="utf-8")
+
+            completed = subprocess.run(
+                [
+                    str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                    str(ROOT / "backend" / "cli.py"),
+                    "ps",
+                    str(root),
+                    "-m",
+                    "inventory,loc",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+            )
+
+            payload = json.loads(completed.stdout)
+            self.assertEqual(payload["summary"]["code_file_count"], 1)
+
+    def test_cli_test_backend_supports_command_alias(self):
+        completed = subprocess.run(
+            [
+                str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                str(ROOT / "backend" / "cli.py"),
+                "tb",
+                "--suite",
+                "unit",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+
+        self.assertIn("OK", completed.stdout)
+
+    def test_cli_root_help_lists_alias_on_next_line(self):
+        completed = subprocess.run(
+            [
+                str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                str(ROOT / "backend" / "cli.py"),
+                "--lang",
+                "zh",
+                "-h",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+
+        self.assertIn("  serve        启动 SmartMetric 后端服务", completed.stdout)
+        self.assertIn("               srv, sv", completed.stdout)
+        self.assertNotIn("serve / srv", completed.stdout)
+
+    def test_cli_help_all_lists_command_catalog(self):
+        completed = subprocess.run(
+            [
+                str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                str(ROOT / "backend" / "cli.py"),
+                "help",
+                "-a",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+
+        self.assertIn("全部命令", completed.stdout)
+        self.assertIn("  test backend       运行后端自动化测试", completed.stdout)
+        self.assertIn("别名: tb, t b, t backend", completed.stdout)
+
+    def test_cli_help_topic_renders_specific_command_help(self):
+        completed = subprocess.run(
+            [
+                str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                str(ROOT / "backend" / "cli.py"),
+                "help",
+                "serve",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+
+        self.assertIn("smartmetric serve - 启动 SmartMetric 后端服务", completed.stdout)
+        self.assertIn("别名:", completed.stdout)
+
+    def test_cli_project_scan_reads_ignore_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "coverage").mkdir()
+            (root / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            (root / "coverage" / "skip.py").write_text("print('skip')\n", encoding="utf-8")
+            (root / ".smartmetricignore").write_text("coverage\n", encoding="utf-8")
+
+            completed = subprocess.run(
+                [
+                    str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                    str(ROOT / "backend" / "cli.py"),
+                    "project-scan",
+                    str(root),
+                    "--modules",
+                    "inventory,loc",
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+            )
+
+            payload = json.loads(completed.stdout)
+            self.assertTrue(payload["scan_options"]["ignore_file_found"])
+            self.assertEqual(payload["summary"]["code_file_count"], 1)
 
     def test_cli_project_scan_supports_ignore_args(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -171,6 +359,27 @@ class ProjectMetricTests(unittest.TestCase):
             payload = response.get_json()["data"]
             self.assertEqual(payload["summary"]["code_file_count"], 1)
             self.assertIn("coverage", payload["scan_options"]["effective_ignore_dirs"])
+
+    def test_project_scan_api_reads_ignore_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "tmp").mkdir()
+            (root / "main.py").write_text("print('ok')\n", encoding="utf-8")
+            (root / "tmp" / "skip.py").write_text("print('skip')\n", encoding="utf-8")
+            (root / ".smartmetricignore").write_text("tmp\n", encoding="utf-8")
+
+            response = self.client.post(
+                "/api/metrics/project/scan",
+                json={
+                    "path": str(root),
+                    "modules": ["inventory", "loc"],
+                },
+            )
+
+            self.assertEqual(response.status_code, 200)
+            payload = response.get_json()["data"]
+            self.assertTrue(payload["scan_options"]["ignore_file_found"])
+            self.assertEqual(payload["summary"]["code_file_count"], 1)
 
 
 if __name__ == "__main__":

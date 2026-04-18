@@ -1,0 +1,19 @@
+# SmartMetric project-specific ignore rules
+# Syntax is close to .gitignore for common cases:
+# - blank lines and # comments are ignored
+# - plain names target directories
+# - wildcards and paths act like glob rules
+# - ! can re-include a previously ignored path
+
+coverage
+tmp
+temp
+*.generated.*
+*.min.js
+*.map
+!/docs/keep.md
+
+docs/
+agents/
+samples/
+tests/

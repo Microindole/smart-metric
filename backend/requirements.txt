@@ -1,4 +1,6 @@
 flask==3.0.3
 flask-cors==4.0.1
 javalang==0.13.0
+langchain==0.3.27
+langchain-openai==0.3.29
 reportlab==4.2.2

@@ -7,10 +7,14 @@ from typing import Iterable
 def export_report(payload: dict, fmt: str) -> bytes:
     normalized = fmt.lower()
     if normalized == "markdown":
+        if payload.get("report_type") == "ai_review":
+            return build_ai_review_markdown(payload).encode("utf-8")
         return build_markdown_report(payload).encode("utf-8")
     if normalized == "html":
         return build_html_report(payload).encode("utf-8")
     if normalized == "pdf":
+        if payload.get("report_type") == "ai_review":
+            return build_ai_review_pdf_report(payload)
         return build_pdf_report(payload)
     raise ValueError(f"暂不支持的报告导出格式: {fmt}")
 
@@ -158,6 +162,122 @@ def build_pdf_report(payload: dict) -> bytes:
                 )
             )
             story.extend([table, Spacer(1, 8)])
+
+    doc.build(story)
+    return buffer.getvalue()
+
+
+def build_ai_review_markdown(payload: dict) -> str:
+    title = payload.get("title", "SmartMetric AI 审查报告")
+    subtitle = payload.get("subtitle", "")
+    summary = payload.get("summary", {})
+    sections = payload.get("sections", [])
+
+    lines = [f"# {title}"]
+    if subtitle:
+        lines.extend(["", subtitle])
+
+    if summary:
+        lines.extend(["", "## 总览", ""])
+        for key, value in summary.items():
+            lines.append(f"- **{key}**: {value}")
+
+    for section in sections:
+        heading = section.get("heading", "Section")
+        lines.extend(["", f"## {heading}"])
+        body = section.get("text", "")
+        if body:
+            lines.extend(["", body])
+        for row in section.get("rows", []):
+            if not isinstance(row, dict):
+                continue
+            lines.extend(["", f"### {row.get('filename', '-')}", ""])
+            for field in ("priority", "problem", "suggestion", "expected_benefit", "refactor_scope"):
+                if field in row:
+                    lines.append(f"- **{field}**: {row.get(field, '')}")
+            if row.get("evidence"):
+                lines.append("- **evidence**:")
+                for item in row.get("evidence", []):
+                    lines.append(f"  - {item}")
+            if row.get("target_symbols"):
+                lines.append(f"- **target_symbols**: {', '.join(row.get('target_symbols', []))}")
+            if row.get("refactor_steps"):
+                lines.append("- **refactor_steps**:")
+                for item in row.get("refactor_steps", []):
+                    lines.append(f"  - {item}")
+    return "\n".join(lines) + "\n"
+
+
+def build_ai_review_pdf_report(payload: dict) -> bytes:
+    try:
+        from reportlab.lib import colors
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import mm
+        from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+        from reportlab.pdfbase.pdfmetrics import registerFont
+        from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer
+    except ImportError as exc:  # pragma: no cover
+        raise RuntimeError("PDF 导出依赖未安装，请执行 pip install -r backend\\requirements.txt") from exc
+
+    import io
+
+    registerFont(UnicodeCIDFont("STSong-Light"))
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle("AiZhTitle", parent=styles["Title"], fontName="STSong-Light")
+    heading_style = ParagraphStyle("AiZhHeading", parent=styles["Heading2"], fontName="STSong-Light", spaceAfter=6)
+    subheading_style = ParagraphStyle("AiZhSubHeading", parent=styles["Heading3"], fontName="STSong-Light", spaceAfter=4)
+    body_style = ParagraphStyle("AiZhBody", parent=styles["BodyText"], fontName="STSong-Light", leading=18, spaceAfter=4)
+    label_style = ParagraphStyle("AiZhLabel", parent=body_style, textColor=colors.HexColor("#102a43"))
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm, topMargin=18 * mm, bottomMargin=18 * mm)
+    story = [Paragraph(str(payload.get("title", "SmartMetric AI 审查报告")), title_style), Spacer(1, 8)]
+
+    subtitle = payload.get("subtitle", "")
+    if subtitle:
+        story.extend([Paragraph(str(subtitle), body_style), Spacer(1, 8)])
+
+    summary = payload.get("summary", {})
+    if summary:
+        story.extend([Paragraph("总览", heading_style), Spacer(1, 4)])
+        for key, value in summary.items():
+            story.append(Paragraph(f"{key}: {value}", body_style))
+        story.append(Spacer(1, 8))
+
+    for section in payload.get("sections", []):
+        story.extend([Paragraph(str(section.get("heading", "Section")), heading_style), Spacer(1, 4)])
+        text = section.get("text", "")
+        if text:
+            story.extend([Paragraph(str(text).replace("\n", "<br/>"), body_style), Spacer(1, 4)])
+
+        rows = section.get("rows", [])
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            block = [Paragraph(str(row.get("filename", "-")), subheading_style)]
+            for field, label in (
+                ("priority", "优先级"),
+                ("problem", "问题"),
+                ("suggestion", "建议"),
+                ("expected_benefit", "预期收益"),
+                ("refactor_scope", "改动范围"),
+            ):
+                value = row.get(field)
+                if value not in (None, "", []):
+                    block.append(Paragraph(f"{label}: {value}", label_style))
+            if row.get("target_symbols"):
+                block.append(Paragraph(f"目标符号: {', '.join(row.get('target_symbols', []))}", label_style))
+            if row.get("evidence"):
+                block.append(Paragraph("证据:", label_style))
+                for item in row.get("evidence", []):
+                    block.append(Paragraph(f"- {item}", body_style))
+            if row.get("refactor_steps"):
+                block.append(Paragraph("建议步骤:", label_style))
+                for item in row.get("refactor_steps", []):
+                    block.append(Paragraph(f"- {item}", body_style))
+            block.append(Spacer(1, 8))
+            story.append(KeepTogether(block))
 
     doc.build(story)
     return buffer.getvalue()

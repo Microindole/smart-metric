@@ -21,6 +21,7 @@
 ```powershell
 .\.venv\Scripts\python.exe -m unittest tests.test_project_metric
 .\.venv\Scripts\python.exe -m unittest tests.test_project_report
+.\.venv\Scripts\python.exe -m unittest tests.test_ai_review
 ```
 
 统一自动化入口：
@@ -60,6 +61,20 @@ cd frontend
 npm run dev:fast -- --host 127.0.0.1 --port 3000
 ```
 
+若要验证生产构建链路，使用：
+
+```powershell
+cd frontend
+npm run build
+npm run start
+```
+
+不要直接运行：
+
+```text
+frontend/.nuxt/dist/server/server.mjs
+```
+
 检查页面：
 
 ```text
@@ -69,9 +84,20 @@ npm run dev:fast -- --host 127.0.0.1 --port 3000
 /function-point
 /cfg-metric
 /project-metric
+/ai-review
 /oo-metric
 /estimate-metric
 /report-export
+```
+
+目录选择验证：
+
+```text
+1. 打开 /project-metric 或 /ai-review
+2. 点击“选择目录”
+3. 应弹出系统目录选择框
+4. 选择目录后，输入框应回填绝对路径
+5. 取消选择时，页面应提示已取消，不应报错
 ```
 
 报告导出页手动验证：
@@ -98,6 +124,10 @@ samples/cfg_demo.mmd
 samples/cfg_demo.dot
 samples/cfg_demo.oom
 samples/report_demo.json
+samples/ai_review_phase1.json
+samples/ai_review_phase2.json
+samples/fp.json
+samples/estimate.json
 ```
 
 CLI 验证示例：
@@ -110,6 +140,7 @@ python backend/cli.py help
 python backend/cli.py help -a
 python backend/cli.py ps D:\works\smart-metric -m inventory,loc
 python backend/cli.py tb --suite unit
+python backend/cli.py ai-review D:\works\smart-metric -F json --phase1-file samples/ai_review_phase1.json --phase2-file samples/ai_review_phase2.json
 python backend/cli.py tp samples/cfg_demo.json
 python backend/cli.py serve --host 127.0.0.1 --port 5000
 python backend/cli.py oo-source samples/oo_demo.java
@@ -125,6 +156,20 @@ python backend/cli.py project-scan D:\works\smart-metric -m inventory,loc -d cov
 python backend/cli.py report samples/report_demo.json --format markdown
 python backend/cli.py report samples/report_demo.json -F html -o report.html
 python backend/cli.py report samples/report_demo.json --format pdf
+```
+
+AI 审查离线验证：
+
+```text
+1. 准备 phase1.json 和 phase2.json fixture
+2. 运行 ai-review 命令并指定 --phase1-file / --phase2-file
+3. 检查输出 JSON/PDF 是否生成
+4. fixture 模式不依赖网络和 OPENAI_API_KEY
+5. Web 页面可直接进入 /ai-review，检查配置状态和离线示例是否可用
+6. 建议详情区域应能看到 evidence / target_symbols / refactor_steps
+7. 审查结论区域应显示 project_overview / overall_priority / refactor_order
+8. 结果可视化区域应显示 ECharts 图表，而不是空白占位
+9. 真实 AI 模式下，Web 端不应因默认 20 秒超时报错
 ```
 
 CLI 帮助显示约定：

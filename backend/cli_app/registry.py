@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .commands.ai_review_command import AIReviewCommand
 from .commands.cfg_graph_command import CfgGraphCommand
 from .commands.cfg_source_command import CfgSourceCommand
 from .commands.estimate_command import EstimateCommand
@@ -19,6 +20,7 @@ def build_command_registry():
     return {
         "help": HelpCommand(),
         "serve": ServeCommand(),
+        "ai-review": AIReviewCommand(),
         "oo-source": OoSourceCommand(),
         "oo-diagram": OoDiagramCommand(),
         "fp": FunctionPointCommand(),

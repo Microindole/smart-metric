@@ -1,0 +1,28 @@
+{
+  "summary": {
+    "risk_level": "medium",
+    "project_overview": "项目的项目扫描、报告导出和 CLI 帮助链路已经较完整，但存在个别核心文件职责偏重的问题。"
+  },
+  "focus_files": [
+    "backend/core/project_metric/service.py",
+    "backend/cli_app/help.py"
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "high",
+      "category": "maintainability",
+      "filename": "backend/core/project_metric/service.py",
+      "reason": "单文件聚合了忽略规则、目录扫描、依赖分析和设计图分析，职责较多。",
+      "need_source": true
+    },
+    {
+      "id": "F2",
+      "severity": "medium",
+      "category": "complexity",
+      "filename": "backend/cli_app/help.py",
+      "reason": "CLI 帮助渲染逻辑继续增长后容易变成条件堆叠点。",
+      "need_source": true
+    }
+  ]
+}

@@ -27,14 +27,49 @@ frontend/pages/function-point.vue
 frontend/pages/cfg-metric.vue
 frontend/pages/oo-metric.vue
 frontend/pages/project-metric.vue
+frontend/pages/ai-review.vue
 frontend/pages/estimate-metric.vue
 frontend/pages/report-export.vue
 ```
 
 `report-export.vue` 当前支持从前端本地已保存的度量结果自动汇总，并可勾选参与汇总的模块，不再要求手工编写完整 JSON。
 
-`project-metric.vue` 当前支持输入项目目录路径，配置默认忽略、自定义忽略目录、自定义忽略通配规则，并调用后端项目扫描接口。
+`project-metric.vue` 当前支持选择或输入项目目录路径，配置默认忽略、自定义忽略目录、自定义忽略通配规则，并调用后端项目扫描接口。
 同时支持自动读取项目根目录 `.smartmetricignore`，并展示实际生效的忽略规则。
+在本机开发环境下，可点击按钮通过系统目录选择框选择路径。
+
+`ai-review.vue` 当前支持：
+
+```text
+输入项目目录
+点击按钮通过系统目录选择框选择项目目录
+一键填入当前仓库路径
+读取后端 AI 配置状态
+选择模型和导出格式
+指定 phase1/phase2 fixture 进行离线调试
+读取本地 JSON 文件并以内联 payload 发送到后端
+调用后端两阶段 AI 审查接口
+导出 AI 审查报告
+显示项目概览、重构顺序和重点文件结论
+使用 ECharts 对发现严重级别和建议优先级做可视化
+```
+
+AI 审查页面请求约束：
+
+```text
+真实 AI 审查是两阶段调用，Web 端请求超时应显著高于普通接口
+不要沿用全局 20 秒超时去调用 /api/metrics/ai-review/run
+若超时，应明确提示用户稍后重试或先用离线 fixture 验证
+```
+
+目录路径说明：
+
+```text
+浏览器不能直接安全暴露本机真实绝对目录路径
+因此目录选择由后端弹出系统目录选择框完成
+如果系统对话框不可用，仍可手动输入路径或使用“一键填入当前仓库路径”
+本地 JSON 附件可通过文件选择器读取，因为这类文件可以直接读内容后以内联 payload 发送
+```
 
 菜单入口：
 
@@ -89,6 +124,24 @@ http://127.0.0.1:3000/usecase-metric
 http://127.0.0.1:3000/function-point
 http://127.0.0.1:3000/cfg-metric
 ```
+
+## Nuxt 入口约定
+
+- 开发入口：`npm run dev` / `npm run dev:fast`
+- 构建入口：`npm run build` 或 `npm run build:clean`
+- 生产启动入口：`npm run start`
+
+不要直接运行：
+
+```text
+frontend/.nuxt/dist/server/server.mjs
+```
+
+原因：
+
+- `.nuxt/` 是开发期生成物，不是稳定的对外启动入口
+- 正确的生产入口是 `frontend/.output/server/index.mjs`
+- 仓库已经在 `frontend/package.json` 中封装了 `npm run start`
 
 ## 关于 npm run build
 

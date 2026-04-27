@@ -1,0 +1,8 @@
+{
+  "metric_type": "fp",
+  "metric_value": 35,
+  "productivity": 8,
+  "hours_per_person_month": 160,
+  "cost_per_person_month": 12000,
+  "team_size": 3
+}

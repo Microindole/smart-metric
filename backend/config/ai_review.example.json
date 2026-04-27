@@ -1,0 +1,23 @@
+{
+  "planner": {
+    "provider": "openai_compat",
+    "model": "gpt-4.1-mini",
+    "apiKey": "",
+    "apiBase": ""
+  },
+  "memory": {
+    "enabled": true,
+    "autoCompact": true,
+    "compactOnComplete": true,
+    "compactOnFailure": true,
+    "retrievalScope": "global",
+    "retrievalStrength": "standard",
+    "cleanupEnabled": true,
+    "cleanupIntervalHours": 24
+  },
+  "push": {
+    "enabled": true,
+    "onSessionComplete": true,
+    "onSessionFailure": false
+  }
+}

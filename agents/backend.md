@@ -54,6 +54,20 @@ app.register_blueprint(<blueprint>)
 
 新增接口应保持一致。
 
+本机系统对话框接口：
+
+```text
+POST /api/system/pick-directory
+```
+
+约束：
+
+```text
+该接口用于本机开发/演示环境
+由后端弹出系统目录选择框，再把选中路径返回前端
+不要把它设计成远程部署环境下的通用能力
+```
+
 ## 当前路由模块
 
 ```text
@@ -66,6 +80,10 @@ backend/routes/metrics_oo_estimate.py
   面向对象 CK/LK 度量
   类图级 OO 度量
   项目估算
+
+backend/routes/system_dialog.py
+  本机系统目录选择对话框
+  为 project-metric / ai-review 页面提供目录选择能力
 ```
 
 后端依赖中包含：
@@ -148,6 +166,8 @@ backend/cli.py report
 backend/core/project_metric/
 backend/cli.py project-scan
 backend/cli.py project-report
+backend/core/ai_review/
+backend/cli.py ai-review
 ```
 
 职责：
@@ -159,6 +179,31 @@ backend/cli.py project-report
 排查上帝文件与上帝类
 清点并分析用例图/类图/控制流图设计文件
 构建项目级总报告并导出 markdown/html/pdf
+基于本地度量结果和源码片段执行两阶段 AI 审查
+```
+
+AI 审查模块：
+
+```text
+backend/core/ai_review/
+  prompting.py           prompt 变量构建
+  context_builder.py     本地报告转 AI 上下文
+  source_selector.py     重点文件选择与源码裁剪
+  langchain_adapter.py   LangChain/OpenAI 适配层
+  config.py              本地配置文件与环境变量合并
+  service.py             两阶段审查主流程
+backend/config/ai_review.example.json
+backend/config/ai_review.local.json
+```
+
+约束：
+
+```text
+AI 审查必须先复用本地 project-scan / loc / cfg / oo 结果
+不要让模型直接读取整个仓库
+优先使用结构化 JSON 返回，不依赖自由文本
+fixture 模式用于离线测试，真实模式依赖 OPENAI_API_KEY
+本地配置文件使用 example 入库、local 忽略的模式
 ```
 
 忽略配置：

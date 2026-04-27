@@ -51,6 +51,20 @@ npm run dev
 http://127.0.0.1:3000
 ```
 
+生产构建与启动：
+
+```powershell
+cd D:\works\smart-metric\frontend
+npm run build
+npm run start
+```
+
+注意：
+
+- 不要直接运行 `frontend/.nuxt/dist/server/server.mjs`，这不是对外启动入口。
+- `npm run build` 后应使用 `node .output/server/index.mjs`，仓库里已经封装成 `npm run start`。
+- 如果出现 Nuxt 生成物异常，先执行 `npm run clean` 或 `npm run build:clean`。
+
 前端页面包括：
 
 - `/`
@@ -60,6 +74,7 @@ http://127.0.0.1:3000
 - `/oo-metric`
 - `/cfg-metric`
 - `/project-metric`
+- `/ai-review`
 - `/estimate-metric`
 - `/report-export`
 
@@ -87,6 +102,8 @@ python backend\cli.py test path samples\cfg_demo.json
 python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
 python backend\cli.py tp samples\cfg_demo.json
 python backend\cli.py tb --suite unit
+python backend\cli.py ai-review D:\works\smart-metric -F json --phase1-file samples\ai_review_phase1.json --phase2-file samples\ai_review_phase2.json
+python backend\cli.py ai-review D:\works\smart-metric -F pdf -P samples\fp.json -E samples\estimate.json
 python backend\cli.py project-scan D:\works\smart-metric
 python backend\cli.py project-report D:\works\smart-metric -F pdf
 python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
@@ -108,6 +125,7 @@ python backend\cli.py oo-diagram samples\class_diagram_demo.xml
 python backend\cli.py cfg-graph samples\cfg_demo.json
 python backend\cli.py oos samples\oo_demo.java
 python backend\cli.py cfg samples\cfg_demo.json
+python backend\cli.py ai-review D:\works\smart-metric -F pdf -o ai-review.pdf --phase1-file samples\ai_review_phase1.json --phase2-file samples\ai_review_phase2.json
 python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
 python backend\cli.py project-report D:\works\smart-metric -F pdf -o smartmetric-report.pdf -P fp.json -E estimate.json
 python backend\cli.py report samples\report_demo.json --format markdown
@@ -129,6 +147,21 @@ python backend\cli.py report samples\report_demo.json --format pdf
 - 带通配符或路径的规则按 glob 处理，例如 `*.generated.py`、`frontend/dist/*`
 - `!` 可用于反向包含，例如 `!/logs/keep.py`
 - `/` 开头表示相对项目根目录，例如 `/logs/`
+
+AI 审查：
+
+- 默认通过 LangChain + OpenAI 两阶段审查：
+  - 第一轮读取项目度量摘要并输出重点文件
+  - 第二轮读取本地源码片段并输出改进建议
+- 可通过环境变量配置：
+  - `OPENAI_API_KEY`
+  - `OPENAI_API_BASE`
+  - `OPENAI_MODEL`
+- 也可通过本地配置文件配置：
+  - 模板文件：`backend/config/ai_review.example.json`
+  - 本地文件：`backend/config/ai_review.local.json`
+  - `ai_review.local.json` 已被 Git 忽略，不会提交
+- 离线测试可通过 `--phase1-file` / `--phase2-file` 提供固定 JSON 结果
 
 ## 自动化测试
 

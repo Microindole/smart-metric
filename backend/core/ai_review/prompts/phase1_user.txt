@@ -1,0 +1,9 @@
+下面是项目的本地度量上下文。
+
+请根据上下文输出第一轮审查 JSON。
+
+Schema:
+{schema_text}
+
+Context:
+{context_text}

@@ -3,7 +3,10 @@
     <div class="page-wrap">
       <a-card title="项目目录扫描" class="panel-card">
         <div class="form-grid">
-          <a-input v-model:value="projectPath" placeholder="输入项目根目录，例如 D:\\works\\smart-metric" />
+          <a-space-compact style="width: 100%">
+            <a-input v-model:value="projectPath" placeholder="选择或输入项目根目录，例如 D:\\works\\smart-metric" />
+            <a-button :loading="pickingDirectory" @click="pickProjectDirectory">选择目录</a-button>
+          </a-space-compact>
           <a-checkbox v-model:checked="useDefaultIgnores">使用默认忽略目录</a-checkbox>
           <a-checkbox v-model:checked="useIgnoreFile">读取 .smartmetricignore</a-checkbox>
           <a-input v-model:value="ignoreFileName" placeholder="忽略文件名，默认 .smartmetricignore" />
@@ -77,6 +80,7 @@ import api from '~/utils/api'
 import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const loading = ref(false)
+const pickingDirectory = ref(false)
 const projectPath = ref('')
 const useDefaultIgnores = ref(true)
 const useIgnoreFile = ref(true)
@@ -244,6 +248,27 @@ const fillRecommendedIgnores = () => {
 const clearIgnoreInputs = () => {
   ignoreDirsText.value = ''
   ignoreGlobsText.value = ''
+}
+
+const pickProjectDirectory = async () => {
+  pickingDirectory.value = true
+  try {
+    const { data } = await api.post('/api/system/pick-directory', {
+      initial_directory: projectPath.value.trim() || 'D:\\works\\smart-metric',
+      title: '选择项目扫描目录',
+    })
+    projectPath.value = data.data.path
+    message.success('已选择项目目录')
+  } catch (err) {
+    const status = err?.response?.status
+    if (status === 409) {
+      message.info('已取消目录选择')
+    } else {
+      message.error(err?.response?.data?.message || '选择项目目录失败')
+    }
+  } finally {
+    pickingDirectory.value = false
+  }
 }
 
 const formatList = (items) => Array.isArray(items) && items.length ? items.join('，') : '无'

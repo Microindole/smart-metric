@@ -15,6 +15,7 @@
   "root_commands": {
     "help": "显示帮助信息，可配合 -a 查看全部命令",
     "serve": "启动 SmartMetric 后端服务",
+    "ai-review": "运行两阶段 AI 代码审查并导出结果",
     "oo-source": "从多语言源码计算 CK/LK",
     "oo-diagram": "从类图 XML/OOM 计算类图级 OO 指标",
     "fp": "从 JSON 文件计算功能点",
@@ -29,6 +30,7 @@
   "root_aliases": {
     "help": ["h"],
     "serve": ["srv", "sv"],
+    "ai-review": ["air", "review"],
     "oo-source": ["oos"],
     "oo-diagram": ["ood"],
     "fp": ["function-point", "fpm"],
@@ -60,6 +62,29 @@
         "-H, --host": "绑定主机地址，默认 127.0.0.1",
         "-p, --port": "绑定端口，默认 5000",
         "-d, --debug": "开启 Flask debug 模式"
+      }
+    },
+    "ai-review": {
+      "path": "ai-review",
+      "summary": "运行两阶段 AI 代码审查",
+      "usage": "python backend\\cli.py ai-review <path> [-M MODEL] [-F json|markdown|html|pdf] [-o PATH] [--phase1-file review1.json] [--phase2-file review2.json]",
+      "arguments": {
+        "path": "项目根目录路径"
+      },
+      "options": {
+        "-m, --modules": "可选模块列表：inventory、loc、dependency、oo、design",
+        "-d, --ignore-dir": "追加忽略目录名，可重复传入",
+        "-g, --ignore-glob": "追加忽略通配规则，可重复传入",
+        "-f, --ignore-file": "忽略文件名，默认 .smartmetricignore",
+        "-G, --no-ignore-file": "关闭项目根目录忽略文件读取",
+        "-D, --no-default-ignore": "关闭默认忽略目录集合",
+        "-M, --model": "LangChain/OpenAI 模型名，默认 gpt-4.1-mini",
+        "-F, --format": "输出格式：json/markdown/html/pdf",
+        "-o, --output": "输出文件路径",
+        "-P, --fp-file": "功能点输入 JSON 路径",
+        "-E, --estimate-file": "项目估算输入 JSON 路径",
+        "--phase1-file": "离线测试用第一轮 AI JSON 文件",
+        "--phase2-file": "离线测试用第二轮 AI JSON 文件"
       }
     },
     "oo-source": {

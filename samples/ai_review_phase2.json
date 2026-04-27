@@ -1,0 +1,57 @@
+{
+  "summary": {
+    "overall_priority": "high",
+    "refactor_order": [
+      "backend/core/project_metric/service.py",
+      "backend/cli_app/help.py"
+    ]
+  },
+  "recommendations": [
+    {
+      "finding_id": "F1",
+      "filename": "backend/core/project_metric/service.py",
+      "priority": "high",
+      "problem": "目录扫描主文件职责过重",
+      "evidence": [
+        "LoC 高于 400",
+        "圈复杂度 119",
+        "analyze_project_directory 同时组织 inventory/loc/dependency/oo/design"
+      ],
+      "target_symbols": [
+        "analyze_project_directory",
+        "scan_inventory",
+        "analyze_dependencies"
+      ],
+      "suggestion": "拆分为 ignore_rules.py、inventory.py、dependency.py、design.py 四个子模块，并保持 service.py 仅做编排。",
+      "refactor_steps": [
+        "先抽离 ignore 规则解析与命中逻辑",
+        "再抽离 inventory 与 design 分析",
+        "最后让 service.py 只保留聚合流程"
+      ],
+      "expected_benefit": "降低维护复杂度，便于独立测试每一类扫描逻辑。",
+      "refactor_scope": "large"
+    },
+    {
+      "finding_id": "F2",
+      "filename": "backend/cli_app/help.py",
+      "priority": "medium",
+      "problem": "帮助渲染逻辑逐步集中",
+      "evidence": [
+        "root help / command help / all help 共存在单文件中",
+        "help 文案和别名展示逻辑持续扩张"
+      ],
+      "target_symbols": [
+        "render_help",
+        "render_root_help",
+        "render_command_help"
+      ],
+      "suggestion": "把 root help、command help、all help 的渲染职责拆为单独函数，并为 i18n 文案映射增加更直接的测试覆盖。",
+      "refactor_steps": [
+        "先把命令列表渲染和详情渲染拆开",
+        "再补帮助输出回归测试"
+      ],
+      "expected_benefit": "减少后续新增命令时的展示回归风险。",
+      "refactor_scope": "small"
+    }
+  ]
+}

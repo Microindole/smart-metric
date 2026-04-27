@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 
@@ -380,6 +381,28 @@ class ProjectMetricTests(unittest.TestCase):
             payload = response.get_json()["data"]
             self.assertTrue(payload["scan_options"]["ignore_file_found"])
             self.assertEqual(payload["summary"]["code_file_count"], 1)
+
+    def test_pick_directory_api_returns_selected_path(self):
+        with patch("routes.system_dialog.select_directory", return_value="D:\\works\\smart-metric"):
+            response = self.client.post(
+                "/api/system/pick-directory",
+                json={"title": "选择项目目录"},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()["data"]
+        self.assertEqual(payload["path"], "D:\\works\\smart-metric")
+
+    def test_pick_directory_api_handles_cancel(self):
+        with patch("routes.system_dialog.select_directory", return_value=""):
+            response = self.client.post(
+                "/api/system/pick-directory",
+                json={"title": "选择项目目录"},
+            )
+
+        self.assertEqual(response.status_code, 409)
+        payload = response.get_json()
+        self.assertFalse(payload["success"])
 
 
 if __name__ == "__main__":

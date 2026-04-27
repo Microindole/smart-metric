@@ -1,0 +1,15 @@
+{
+  "counts": {
+    "EI": { "simple": 2, "average": 1, "complex": 0 },
+    "EO": { "simple": 1, "average": 1, "complex": 0 },
+    "EQ": { "simple": 1, "average": 0, "complex": 0 },
+    "ILF": { "simple": 1, "average": 0, "complex": 0 },
+    "EIF": { "simple": 0, "average": 1, "complex": 0 }
+  },
+  "gsc_factors": [
+    { "level": 2 }, { "level": 2 }, { "level": 3 }, { "level": 2 },
+    { "level": 2 }, { "level": 2 }, { "level": 3 }, { "level": 2 },
+    { "level": 2 }, { "level": 2 }, { "level": 1 }, { "level": 2 },
+    { "level": 1 }, { "level": 2 }
+  ]
+}

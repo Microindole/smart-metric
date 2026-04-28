@@ -38,6 +38,14 @@ frontend/pages/report-export.vue
 同时支持自动读取项目根目录 `.smartmetricignore`，并展示实际生效的忽略规则。
 在本机开发环境下，可点击按钮通过系统目录选择框选择路径。
 
+`loc-metric.vue` 当前支持 Java/Python/C++ 的结构化结果展示：
+
+```text
+代码行分析结果会按文件显示 language/class_count/method_count/condition_count/loop_count
+抽象语法树分析结果（类级）支持显示 method_count/field_count/RFC/LCOM
+抽象语法树分析结果（方法级）不再只在 Java 文件有数据，Python/C++ 也会生成方法行
+```
+
 `ai-review.vue` 当前支持：
 
 ```text

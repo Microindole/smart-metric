@@ -138,6 +138,14 @@ docs/complete-test-case.md
 
 该用例覆盖 UCP、LoC、FP、OO、CFG、项目扫描、项目估算和报告导出，并记录页面操作、测试数据和预期数值。
 
+样例使用约定（OO 源码分析）：
+
+```text
+samples/SampleStudent.java 现在为更高复杂度教学样例（约百行，含较多字段/方法）
+samples/sample_script.py 与 samples/sample_algo.cpp 都包含类与多个方法
+在 /oo-metric 或 CLI oo-source 中应能看到“类级 + 方法级”结果，不再只是极简演示
+```
+
 CLI 验证示例：
 
 ```powershell

@@ -20,7 +20,9 @@ frontend/pages/loc-metric.vue
 空行
 注释行
 有效代码行
-Java 结构辅助分析
+Java/Python/C++ 结构辅助分析
+类级指标（method_count / field_count / RFC / LCOM）
+方法级明细（class_name / method_name）
 ```
 
 ## 用例点 UCP

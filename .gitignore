@@ -54,3 +54,5 @@ backend/config/ai_review.local.json
 
 temp/
 tmp/
+.tmp/
+.superpowers/

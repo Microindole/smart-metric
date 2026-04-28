@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import re
 from typing import Iterable, Optional
+
+from core.oo_metric.strategies import create_source_analyzer
 
 from .language_rules import detect_language
 from .java_structure import analyze_java_structure
@@ -14,6 +17,46 @@ def _decode_bytes(content: bytes) -> str:
         except UnicodeDecodeError:
             continue
     raise ValueError("文件编码无法识别")
+
+
+def _analyze_non_java_structure(filename: str, text: str, language: str) -> dict:
+    analyzer = create_source_analyzer(language)
+    classes = analyzer.analyze(filename, text)
+
+    class_metrics = []
+    method_metrics = []
+    for item in classes:
+        class_metrics.append(
+            {
+                "class_name": item["class_name"],
+                "method_count": item["lk"]["nom"],
+                "field_count": item["lk"]["noa"],
+                "rfc": item["ck"]["rfc"],
+                "lcom": item["ck"]["lcom"],
+            }
+        )
+
+        for method_name in item.get("methods", []):
+            method_metrics.append(
+                {
+                    "class_name": item["class_name"],
+                    "method_name": method_name,
+                    "called_methods": "",
+                    "used_variables": "",
+                }
+            )
+
+    condition_count = len(re.findall(r"\b(if|elif|switch|case)\b|\?", text))
+    loop_count = len(re.findall(r"\b(for|while|do)\b", text))
+
+    return {
+        "class_count": len(class_metrics),
+        "method_count": len(method_metrics),
+        "condition_count": condition_count,
+        "loop_count": loop_count,
+        "class_metrics": class_metrics,
+        "method_metrics": method_metrics,
+    }
 
 
 def analyze_single_file(filename: str, content: bytes, language: Optional[str] = None) -> dict:
@@ -30,6 +73,10 @@ def analyze_single_file(filename: str, content: bytes, language: Optional[str] =
 
     if detected == "java":
         structure_analysis = analyze_java_structure(text)
+    elif detected in {"python", "cpp", "c", "javascript"}:
+        structure_analysis = _analyze_non_java_structure(filename, text, detected)
+
+    if structure_analysis:
         class_count = structure_analysis["class_count"]
         method_count = structure_analysis["method_count"]
 
@@ -71,7 +118,7 @@ def analyze_files(files: Iterable[dict], language: Optional[str] = None) -> dict
 
     all_class_scales = []
     all_method_scales = []
-    java_structure_summaries = []
+    structure_summaries = []
 
     for item in files:
         res = analyze_single_file(item["filename"], item["content"], language)
@@ -88,9 +135,10 @@ def analyze_files(files: Iterable[dict], language: Optional[str] = None) -> dict
                 all_method_scales.append({"filename": res["filename"], **m})
 
         if res.get("structure_analysis"):
-            java_structure_summaries.append(
+            structure_summaries.append(
                 {
                     "filename": res["filename"],
+                    "language": res["language"],
                     "class_count": res["structure_analysis"]["class_count"],
                     "method_count": res["structure_analysis"]["method_count"],
                     "condition_count": res["structure_analysis"]["condition_count"],
@@ -104,5 +152,6 @@ def analyze_files(files: Iterable[dict], language: Optional[str] = None) -> dict
         "summary": {**total, "comment_ratio": round(total_ratio, 4)},
         "class_scales": all_class_scales,
         "method_scales": all_method_scales,
-        "java_structure_summaries": java_structure_summaries,
+        "structure_summaries": structure_summaries,
+        "java_structure_summaries": structure_summaries,
     }

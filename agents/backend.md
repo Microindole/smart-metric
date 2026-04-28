@@ -110,6 +110,15 @@ backend/core/class_diagram_metric/
 backend/core/project_metric/
 ```
 
+`backend/core/loc_metric/` 当前输出约定：
+
+```text
+/api/metrics/loc/calculate 不再只返回 Java 结构化结果
+Java/Python/C++ 文件都会尝试生成 structure_summaries、class_scales、method_scales
+class_scales 统一包含 class_name/method_count/field_count/rfc/lcom
+method_scales 至少包含 class_name/method_name，并与前端方法级表格对齐
+```
+
 CLI 入口：
 
 ```text

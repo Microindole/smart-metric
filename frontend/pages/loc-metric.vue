@@ -29,12 +29,12 @@
       </a-card>
 
       <a-card title="代码行分析结果" class="panel-card">
-        <div v-if="javaSummaries.length">
-          <div v-for="item in javaSummaries" :key="item.filename" class="analysis-line">
-            该 {{ item.filename }} 中：类 {{ item.class_count }} 个，方法 {{ item.method_count }} 个，判断语句 {{ item.condition_count }} 处，循环语句 {{ item.loop_count }} 处。
+        <div v-if="structureSummaries.length">
+          <div v-for="item in structureSummaries" :key="`${item.filename}-${item.language}`" class="analysis-line">
+            该 {{ item.filename }}（{{ item.language }}）中：类 {{ item.class_count }} 个，方法 {{ item.method_count }} 个，判断语句 {{ item.condition_count }} 处，循环语句 {{ item.loop_count }} 处。
           </div>
         </div>
-        <div v-else class="analysis-line">当前未检测到 Java 结构化结果（仅 Java 文件会生成）。</div>
+        <div v-else class="analysis-line">当前未检测到可展示的结构化结果（支持 Java/Python/C++）。</div>
       </a-card>
 
       <a-card title="抽象语法树分析结果（类级）" class="panel-card">
@@ -65,7 +65,7 @@ const language = ref('')
 const rows = ref([])
 const classRows = ref([])
 const methodRows = ref([])
-const javaSummaries = ref([])
+const structureSummaries = ref([])
 const summary = reactive({ total_lines: 0, code_lines: 0, comment_lines: 0, blank_lines: 0 })
 
 const columns = [
@@ -122,7 +122,7 @@ const analyze = async () => {
     Object.assign(summary, data.data.summary)
     classRows.value = (data.data.class_scales || []).map((x, i) => ({ ...x, rowKey: `${x.filename}-${x.class_name}-${i}` }))
     methodRows.value = (data.data.method_scales || []).map((x, i) => ({ ...x, rowKey: `${x.filename}-${x.class_name}-${x.method_name}-${i}` }))
-    javaSummaries.value = data.data.java_structure_summaries || []
+    structureSummaries.value = data.data.structure_summaries || data.data.java_structure_summaries || []
     saveMetricSnapshot('loc', {
       description: '基于源码文件进行代码行与结构统计。',
       summary: {

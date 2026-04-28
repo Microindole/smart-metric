@@ -126,12 +126,26 @@
       <a-card title="结果可视化" class="panel-card">
         <a-empty v-if="!hasResult" description="运行 AI 审查后，这里会显示严重级别和建议优先级图表。" />
         <div v-else class="chart-grid">
-          <ClientOnly>
-            <VChart class="chart-box" :option="severityChartOption" autoresize />
-          </ClientOnly>
-          <ClientOnly>
-            <VChart class="chart-box" :option="priorityChartOption" autoresize />
-          </ClientOnly>
+          <div class="chart-box">
+            <div class="chart-title">发现严重级别</div>
+            <div v-for="item in severityRows" :key="`severity-${item.label}`" class="bar-row">
+              <span class="bar-label">{{ item.label }}</span>
+              <span class="bar-track">
+                <span class="bar-fill" :style="{ width: `${item.percent}%`, background: item.color }"></span>
+              </span>
+              <span class="bar-value">{{ item.count }}</span>
+            </div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-title">建议优先级</div>
+            <div v-for="item in priorityRows" :key="`priority-${item.label}`" class="bar-row">
+              <span class="bar-label">{{ item.label }}</span>
+              <span class="bar-track">
+                <span class="bar-fill" :style="{ width: `${item.percent}%`, background: item.color }"></span>
+              </span>
+              <span class="bar-value">{{ item.count }}</span>
+            </div>
+          </div>
         </div>
       </a-card>
 
@@ -188,15 +202,8 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import VChart from 'vue-echarts'
-import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, BarChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, TooltipComponent, TitleComponent } from 'echarts/components'
-import { use } from 'echarts/core'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
-
-use([CanvasRenderer, PieChart, BarChart, GridComponent, LegendComponent, TooltipComponent, TitleComponent])
 
 const loading = ref(false)
 const pickingDirectory = ref(false)
@@ -272,45 +279,6 @@ const previewText = computed(() =>
     2
   )
 )
-const severityChartOption = computed(() => ({
-  title: { text: '发现严重级别', left: 'center', textStyle: { fontSize: 13, fontWeight: 600 } },
-  tooltip: { trigger: 'item' },
-  legend: { bottom: 0 },
-  series: [
-    {
-      type: 'pie',
-      radius: ['42%', '68%'],
-      data: severityRows.value.map((item) => ({
-        name: item.label,
-        value: item.count,
-        itemStyle: { color: item.color },
-      })),
-      label: { formatter: '{b}: {c}' },
-    },
-  ],
-}))
-const priorityChartOption = computed(() => ({
-  title: { text: '建议优先级', left: 'center', textStyle: { fontSize: 13, fontWeight: 600 } },
-  tooltip: { trigger: 'axis' },
-  grid: { left: 48, right: 20, top: 48, bottom: 30 },
-  xAxis: {
-    type: 'category',
-    data: priorityRows.value.map((item) => item.label),
-    axisTick: { alignWithLabel: true },
-  },
-  yAxis: { type: 'value', minInterval: 1 },
-  series: [
-    {
-      type: 'bar',
-      data: priorityRows.value.map((item) => ({
-        value: item.count,
-        itemStyle: { color: item.color },
-      })),
-      barMaxWidth: 42,
-    },
-  ],
-}))
-
 const loadConfig = async () => {
   try {
     const { data } = await api.get('/api/metrics/ai-review/config')
@@ -555,8 +523,47 @@ onMounted(() => {
   gap: 16px;
 }
 .chart-box {
-  height: 320px;
   width: 100%;
+  min-height: 240px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e8edf5;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.chart-title {
+  color: #102a43;
+  font-weight: 700;
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+}
+.bar-label {
+  color: #516070;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.bar-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8edf5;
+}
+.bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 8px;
+  border-radius: inherit;
+}
+.bar-value {
+  color: #102a43;
+  font-weight: 700;
+  text-align: right;
 }
 .recommendation-stack {
   display: grid;

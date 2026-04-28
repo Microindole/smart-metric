@@ -130,6 +130,14 @@ samples/fp.json
 samples/estimate.json
 ```
 
+完整端到端验收用例：
+
+```text
+docs/complete-test-case.md
+```
+
+该用例覆盖 UCP、LoC、FP、OO、CFG、项目扫描、项目估算和报告导出，并记录页面操作、测试数据和预期数值。
+
 CLI 验证示例：
 
 ```powershell

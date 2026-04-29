@@ -16,7 +16,6 @@ SM-E2E-001
 - 面向对象度量 OO / CK / LK
 - 控制流图与圈复杂度 CFG
 - 项目扫描
-- 项目估算
 - 报告导出
 
 ## 前置条件
@@ -49,8 +48,11 @@ http://127.0.0.1:3000/
 samples/SampleStudent.java
 samples/oo_demo.java
 samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
 samples/sample_script.py
+samples/cfg_complex_demo.py
 samples/cfg_demo.json
+samples/cfg_login_flow.json
 samples/report_demo.json
 samples/
 ```
@@ -216,12 +218,14 @@ max_cbo = 2
 
 ```text
 samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
 ```
 
 预期：
 
 ```text
-class_count = 3
+class_diagram_demo.xml -> class_count = 3
+class_diagram_demo.oom -> class_count = 4, relation_count = 3
 ```
 
 ### 6. 控制流图度量 CFG
@@ -235,10 +239,11 @@ class_count = 3
 源码级输入：
 
 ```text
-samples/sample_script.py
+基础样例：samples/sample_script.py
+复杂度演示样例：samples/cfg_complex_demo.py
 ```
 
-预期结果：
+基础样例预期结果：
 
 ```text
 file_count = 1
@@ -246,13 +251,30 @@ max_complexity = 1
 total_decision_points = 0
 ```
 
+复杂度演示样例预期结果：
+
+```text
+file_count = 1
+max_complexity = 12
+total_decision_points = 11
+```
+
 图文件输入：
 
 ```text
-samples/cfg_demo.json
+常见业务流程样例：samples/cfg_login_flow.json
+最小分支样例：samples/cfg_demo.json
 ```
 
-预期结果：
+常见业务流程样例预期结果：
+
+```text
+node_count = 14
+edge_count = 17
+cyclomatic_complexity = 5
+```
+
+最小分支样例预期结果：
 
 ```text
 node_count = 6
@@ -294,14 +316,6 @@ class_diagram_count = 1
 cfg_graph_count = 4
 god_files = 0
 god_classes = 0
-```
-
-### 8. 项目估算
-
-页面：
-
-```text
-/estimate-metric
 ```
 
 输入：
@@ -434,7 +448,6 @@ $routes = @(
   '/oo-metric',
   '/cfg-metric',
   '/project-metric',
-  '/estimate-metric',
   '/report-export'
 )
 
@@ -457,7 +470,6 @@ foreach ($route in $routes) {
 - 五个核心度量页面均能计算并显示结果。
 - 样例文件上传后结果与本文档预期一致。
 - 项目扫描能识别样例目录中的代码文件、设计文件和图文件。
-- 估算器能基于 FP 结果生成工作量、成本和工期。
 - 报告导出能汇总已保存结果并生成 Markdown、HTML、PDF。
 - 自动化测试 `48 tests OK`。
 - 前端全部路由返回 200。

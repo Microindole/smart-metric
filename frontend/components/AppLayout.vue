@@ -83,7 +83,6 @@
 
           <div class="palette-actions">
             <button @click="go('/project-metric')">项目扫描</button>
-            <button @click="go('/estimate-metric')">项目估算</button>
             <button @click="go('/report-export')">生成报告</button>
           </div>
         </section>
@@ -115,7 +114,6 @@ const navItems = [
   { key: 'cfg', path: '/cfg-metric', acronym: 'CFG', label: '控制流图度量', group: '复杂度', description: '从源码或结构化控制流图计算圈复杂度。' },
   { key: 'project', path: '/project-metric', acronym: 'PRJ', label: '项目扫描', group: '项目级', description: '扫描项目目录，汇总代码、依赖、设计图和风险文件。' },
   { key: 'ai-review', path: '/ai-review', acronym: 'AI', label: 'AI 审查', group: '质量审查', description: '对项目风险文件进行本地审查与 AI 分析，生成审查建议。' },
-  { key: 'estimate', path: '/estimate-metric', acronym: 'EST', label: '项目估算', group: '交付评估', description: '基于 FP、UCP 或 LoC 估算工作量、成本、工期与人数。' },
   { key: 'report', path: '/report-export', acronym: 'RPT', label: '报告导出', group: '交付物', description: '汇总度量结果并导出 Markdown、HTML 或 PDF 报告。' },
 ]
 

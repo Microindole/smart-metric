@@ -1,0 +1,37 @@
+{
+  "nodes": [
+    {"id": "n01_start", "label": "Start", "type": "start"},
+    {"id": "n02_enter_credentials", "label": "Enter credentials", "type": "statement"},
+    {"id": "n03_validate_input", "label": "Input valid?", "type": "decision"},
+    {"id": "n04_show_validation_error", "label": "Show validation error", "type": "branch"},
+    {"id": "n05_find_account", "label": "Find account", "type": "statement"},
+    {"id": "n06_account_exists", "label": "Account exists?", "type": "decision"},
+    {"id": "n07_show_account_error", "label": "Show account error", "type": "branch"},
+    {"id": "n08_password_valid", "label": "Password valid?", "type": "decision"},
+    {"id": "n09_record_failed_login", "label": "Record failed login", "type": "branch"},
+    {"id": "n10_account_locked", "label": "Account locked?", "type": "decision"},
+    {"id": "n11_show_locked_message", "label": "Show locked message", "type": "branch"},
+    {"id": "n12_create_session", "label": "Create session", "type": "statement"},
+    {"id": "n13_open_dashboard", "label": "Open dashboard", "type": "statement"},
+    {"id": "n14_end", "label": "End", "type": "end"}
+  ],
+  "edges": [
+    {"from": "n01_start", "to": "n02_enter_credentials", "label": "next"},
+    {"from": "n02_enter_credentials", "to": "n03_validate_input", "label": "submit"},
+    {"from": "n03_validate_input", "to": "n04_show_validation_error", "label": "invalid"},
+    {"from": "n03_validate_input", "to": "n05_find_account", "label": "valid"},
+    {"from": "n04_show_validation_error", "to": "n14_end", "label": "fail"},
+    {"from": "n05_find_account", "to": "n06_account_exists", "label": "next"},
+    {"from": "n06_account_exists", "to": "n07_show_account_error", "label": "no"},
+    {"from": "n06_account_exists", "to": "n08_password_valid", "label": "yes"},
+    {"from": "n07_show_account_error", "to": "n14_end", "label": "fail"},
+    {"from": "n08_password_valid", "to": "n09_record_failed_login", "label": "no"},
+    {"from": "n08_password_valid", "to": "n10_account_locked", "label": "yes"},
+    {"from": "n09_record_failed_login", "to": "n14_end", "label": "fail"},
+    {"from": "n10_account_locked", "to": "n11_show_locked_message", "label": "yes"},
+    {"from": "n10_account_locked", "to": "n12_create_session", "label": "no"},
+    {"from": "n11_show_locked_message", "to": "n14_end", "label": "fail"},
+    {"from": "n12_create_session", "to": "n13_open_dashboard", "label": "next"},
+    {"from": "n13_open_dashboard", "to": "n14_end", "label": "success"}
+  ]
+}

@@ -70,14 +70,20 @@ def build_graph(decisions: List[Decision]) -> tuple[list[dict], list[dict]]:
     for index, decision in enumerate(decisions, start=1):
         decision_id = f"d{index}"
         branch_id = f"b{index}"
+        join_id = f"j{index}"
         nodes.append({"id": decision_id, "label": decision.label, "type": "decision"})
         nodes.append({"id": branch_id, "label": f"{decision.kind} 分支", "type": "branch"})
+        nodes.append({"id": join_id, "label": "合流", "type": "join"})
         edges.append({"from": previous, "to": decision_id, "label": "next"})
         edges.append({"from": decision_id, "to": branch_id, "label": "true"})
-        edges.append({"from": branch_id, "to": decision_id, "label": "loop" if decision.kind in {"for", "while"} else "join"})
-        previous = decision_id
+        edges.append({"from": decision_id, "to": join_id, "label": "false"})
+        if decision.kind in {"for", "while", "do"}:
+            edges.append({"from": branch_id, "to": decision_id, "label": "loop"})
+        else:
+            edges.append({"from": branch_id, "to": join_id, "label": "join"})
+        previous = join_id
     nodes.append({"id": "end", "label": "End", "type": "end"})
-    edges.append({"from": previous, "to": "end", "label": "false" if decisions else "next"})
+    edges.append({"from": previous, "to": "end", "label": "next"})
     return nodes, edges
 
 

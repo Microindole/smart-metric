@@ -50,7 +50,51 @@
         <a-table :data-source="rows" :columns="columns" row-key="filename" :pagination="false" />
       </a-card>
 
-      <a-card v-if="selectedRow" :title="`${selectedRow.filename} 控制流图 Mermaid`">
+      <a-card v-if="selectedRow" :title="`${selectedRow.filename} 控制流图`">
+        <div v-if="graphNodes.length" class="cfg-graph-canvas">
+          <svg :viewBox="`0 0 700 ${graphHeight}`" role="img" :aria-label="`${selectedRow.filename} 控制流图`">
+            <defs>
+              <marker id="cfg-arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L0,6 L9,3 z" fill="#a94f34" />
+              </marker>
+            </defs>
+            <path
+              v-for="edge in graphEdges"
+              :key="edge.key"
+              class="cfg-edge"
+              :d="edge.path"
+              marker-end="url(#cfg-arrow)"
+            />
+            <text
+              v-for="edge in graphEdges"
+              :key="`${edge.key}-label`"
+              class="cfg-edge-label"
+              :x="edge.labelX"
+              :y="edge.labelY"
+            >
+              {{ edge.label }}
+            </text>
+            <g v-for="node in graphNodes" :key="node.id" class="cfg-node">
+              <rect
+                v-if="node.type !== 'decision'"
+                :x="node.x - node.width / 2"
+                :y="node.y - 22"
+                :width="node.width"
+                height="44"
+                rx="8"
+                :class="`cfg-node-box ${node.type || 'normal'}`"
+              />
+              <polygon
+                v-else
+                :points="`${node.x},${node.y - 30} ${node.x + node.width / 2},${node.y} ${node.x},${node.y + 30} ${node.x - node.width / 2},${node.y}`"
+                class="cfg-node-box decision"
+              />
+              <text class="cfg-node-label" :x="node.x" :y="node.y + 4">{{ node.label }}</text>
+            </g>
+          </svg>
+        </div>
+        <a-empty v-else description="暂无可绘制的控制流图节点" />
+        <div class="mermaid-title">Mermaid 源码</div>
         <pre class="mermaid-box">{{ selectedRow.mermaid }}</pre>
       </a-card>
     </a-space>
@@ -58,7 +102,7 @@
 </template>
 
 <script setup>
-import { h, reactive, ref } from 'vue'
+import { computed, h, reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
 import api from '~/utils/api'
@@ -98,10 +142,68 @@ const columns = [
             selectedRow.value = record
           },
         },
-        '查看图文本'
+        '查看图形'
       ),
   },
 ]
+
+const graphNodes = computed(() => {
+  const sourceNodes = selectedRow.value?.nodes || []
+  const sourceEdges = selectedRow.value?.edges || []
+  const incomingLabels = new Map()
+  const outgoingCount = new Map()
+  sourceEdges.forEach((edge) => {
+    const labels = incomingLabels.get(edge.to) || []
+    labels.push(edge.label)
+    incomingLabels.set(edge.to, labels)
+    outgoingCount.set(edge.from, (outgoingCount.get(edge.from) || 0) + 1)
+  })
+
+  return sourceNodes.map((node, index) => {
+    const type = node.type || (outgoingCount.get(node.id) > 1 ? 'decision' : 'normal')
+    const label = node.label || node.id || `node_${index + 1}`
+    const incoming = incomingLabels.get(node.id) || []
+    const hasBranchIncoming =
+      incoming.some((item) => ['true', 'break', 'continue'].includes(item)) ||
+      (!node.type && incoming.length > 1)
+    const lane = type !== 'decision' && hasBranchIncoming ? 1 : 0
+    return {
+      id: node.id,
+      type,
+      label,
+      width: Math.max(104, Math.min(190, String(label).length * 10 + 36)),
+      x: type === 'branch' || lane === 1 ? 470 : 250,
+      y: 48 + index * 86,
+    }
+  })
+})
+
+const graphHeight = computed(() => Math.max(140, graphNodes.value.length * 86 + 40))
+
+const graphEdges = computed(() => {
+  const nodeMap = new Map(graphNodes.value.map((node, index) => [node.id, { ...node, index }]))
+  return (selectedRow.value?.edges || [])
+    .map((edge, index) => {
+      const from = nodeMap.get(edge.from)
+      const to = nodeMap.get(edge.to)
+      if (!from || !to) return null
+
+      const label = edge.label || ''
+      const sameOrBack = to.index <= from.index
+      const path = sameOrBack
+        ? `M ${from.x + from.width / 2} ${from.y} C 650 ${from.y}, 650 ${to.y}, ${to.x + to.width / 2} ${to.y}`
+        : `M ${from.x} ${from.y + 24} C ${from.x} ${from.y + 54}, ${to.x} ${to.y - 54}, ${to.x} ${to.y - 24}`
+
+      return {
+        key: `${edge.from}-${edge.to}-${index}`,
+        label,
+        path,
+        labelX: sameOrBack ? 612 : (from.x + to.x) / 2 + 14,
+        labelY: sameOrBack ? (from.y + to.y) / 2 - 8 : (from.y + to.y) / 2 - 10,
+      }
+    })
+    .filter(Boolean)
+})
 
 const onFilesSelected = (e) => {
   selectedFiles.value = Array.from(e.target.files || [])
@@ -227,6 +329,69 @@ const exportRows = async () => {
 </script>
 
 <style scoped>
+.cfg-graph-canvas {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid #eadfd4;
+  border-radius: 8px;
+  background: #fffaf4;
+}
+
+.cfg-graph-canvas svg {
+  min-width: 680px;
+  width: 100%;
+}
+
+.cfg-edge {
+  fill: none;
+  stroke: #a94f34;
+  stroke-width: 1.8;
+}
+
+.cfg-edge-label {
+  fill: #766b60;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cfg-node-box {
+  fill: #fffcf7;
+  stroke: #d9c8ba;
+  stroke-width: 1.4;
+}
+
+.cfg-node-box.start,
+.cfg-node-box.end {
+  fill: #f2e2d6;
+  stroke: #c65f3d;
+}
+
+.cfg-node-box.decision {
+  fill: #fff6ec;
+  stroke: #c65f3d;
+}
+
+.cfg-node-box.branch {
+  fill: #f7f1e9;
+}
+
+.cfg-node-label {
+  fill: #191714;
+  font-size: 13px;
+  font-weight: 760;
+  text-anchor: middle;
+}
+
+.mermaid-title {
+  margin: 8px 0;
+  color: #766b60;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .mermaid-box {
   white-space: pre-wrap;
   background: #111827;

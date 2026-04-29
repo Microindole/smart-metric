@@ -38,12 +38,15 @@ scripts/run_backend_tests.py
 scripts/backend_smoke.py
 ```
 
-`tests.test_45_metrics` 包含 Java/Python 控制流 AST 策略断言：
+`tests.test_45_metrics` 包含 Java/Python 控制流 AST 策略断言，并固定校验 `samples/cfg_complex_demo.py` 的演示复杂度：
 
 ```text
 Java   -> ast-java-javalang
 Python -> ast-python
+cfg_complex_demo.py -> cyclomatic_complexity = 12
 ```
+
+其中 CFG 图形断言要求普通 `if` 分支不能画回自身，只有 `for/while/do` 循环允许出现回边。
 
 如果 `.venv` 不存在：
 
@@ -86,7 +89,6 @@ frontend/.nuxt/dist/server/server.mjs
 /project-metric
 /ai-review
 /oo-metric
-/estimate-metric
 /report-export
 ```
 
@@ -100,6 +102,16 @@ frontend/.nuxt/dist/server/server.mjs
 5. 取消选择时，页面应提示已取消，不应报错
 ```
 
+项目扫描结果验证：
+
+```text
+1. /project-metric 页面在未扫描前应显示“选择项目目录并点击开始扫描后，这里会显示项目级结果”
+2. 扫描完成后应显示：项目目录、扫描模块、摘要统计
+3. 应显示项目扫描可视化图表，而不是只有空表格
+4. 切换到其它页面再返回 /project-metric 时，最近一次扫描结果应保留
+5. 扫描整个仓库时，Web 端不应因默认 20 秒超时报错
+```
+
 报告导出页手动验证：
 
 ```text
@@ -110,16 +122,41 @@ frontend/.nuxt/dist/server/server.mjs
 5. 导出 markdown/html/pdf
 ```
 
+功能点页 JSON 导入验证：
+
+```text
+1. 打开 /function-point
+2. 点击“选择 FP JSON 并分析”
+3. 选择 samples/fp.json
+4. 页面应自动回填功能点计数与 GSC 因子并完成计算
+5. 结果区应显示 UFP/GSC 总分/VAF/FP，且无报错提示
+```
+
+控制流图页面手动验证：
+
+```text
+1. 打开 /cfg-metric
+2. 上传 samples/sample_script.py 并点击开始分析
+3. 应看到 sample_script.py 的控制流图 SVG 预览，最小图为 Start -> End
+4. 下方仍应显示 Mermaid 源码
+5. 如需分支演示，上传 samples/cfg_complex_demo.py，预期圈复杂度为 12
+6. 如需导入图文件演示，优先导入 samples/cfg_login_flow.json，预期圈复杂度为 5
+7. 如需最小导入样例，导入 samples/cfg_demo.json
+```
+
 ## 样例文件
 
 ```text
 samples/sample_usecase.oom
 samples/SampleStudent.java
 samples/sample_script.py
+samples/cfg_complex_demo.py
 samples/sample_algo.cpp
 samples/oo_demo.java
 samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
 samples/cfg_demo.json
+samples/cfg_login_flow.json
 samples/cfg_demo.mmd
 samples/cfg_demo.dot
 samples/cfg_demo.oom
@@ -134,9 +171,13 @@ samples/estimate.json
 
 ```text
 docs/complete-test-case.md
+SHOW.md
 ```
 
-该用例覆盖 UCP、LoC、FP、OO、CFG、项目扫描、项目估算和报告导出，并记录页面操作、测试数据和预期数值。
+其中：
+
+- `docs/complete-test-case.md` 偏验收和预期数值
+- `SHOW.md` 偏课堂演示顺序、现场讲解和兜底方案
 
 样例使用约定（OO 源码分析）：
 
@@ -162,6 +203,7 @@ python backend/cli.py serve --host 127.0.0.1 --port 5000
 python backend/cli.py oo-source samples/oo_demo.java
 python backend/cli.py oo-source --language python samples/sample_script.py
 python backend/cli.py oo-diagram samples/class_diagram_demo.xml
+python backend/cli.py oo-diagram samples/class_diagram_demo.oom
 python backend/cli.py cfg-graph samples/cfg_demo.json
 python backend/cli.py cfg-graph samples/cfg_demo.oom
 python backend/cli.py project-scan D:\works\smart-metric
@@ -184,8 +226,11 @@ AI 审查离线验证：
 5. Web 页面可直接进入 /ai-review，检查配置状态和离线示例是否可用
 6. 建议详情区域应能看到 evidence / target_symbols / refactor_steps
 7. 审查结论区域应显示 project_overview / overall_priority / refactor_order
-8. 结果可视化区域应显示 ECharts 图表，而不是空白占位
-9. 真实 AI 模式下，Web 端不应因默认 20 秒超时报错
+8. 结果可视化区域应显示组件化 dashboard，而不是单页堆叠图表
+9. 图表至少应包含：AI 审查总分、质量维度雷达、严重级别、优先级、改动范围、问题类别、重点文件命中、目标符号命中、预期收益分布
+10. 真实 AI 模式下，Web 端不应因默认 20 秒超时报错
+11. 切换到其它页面再返回 /ai-review 时，loading 和结果状态应保持
+12. 手动点击“中断审查”后，页面应提示已取消
 ```
 
 CLI 帮助显示约定：

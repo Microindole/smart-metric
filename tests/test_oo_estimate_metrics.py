@@ -135,6 +135,25 @@ public:
         self.assertEqual(user["diagram_ck"]["dit"], 1)
         self.assertEqual(user["diagram_lk"]["nom"], 1)
 
+    def test_analyzes_class_diagram_oom_sample(self):
+        sample = ROOT / "samples" / "class_diagram_demo.oom"
+        result = analyze_class_diagram_bytes(sample.name, sample.read_bytes())
+
+        self.assertEqual(result["summary"]["class_count"], 4)
+        self.assertEqual(result["summary"]["total_methods"], 8)
+        self.assertEqual(result["summary"]["total_attributes"], 7)
+        self.assertEqual(result["summary"]["relation_count"], 3)
+        self.assertEqual(result["summary"]["max_dit"], 1)
+        self.assertEqual(result["summary"]["max_cbo"], 2)
+        user = next(item for item in result["classes"] if item["class_name"] == "User")
+        self.assertEqual(user["parent"], "BaseEntity")
+        self.assertEqual(user["diagram_ck"]["dit"], 1)
+        self.assertEqual(user["diagram_ck"]["cbo"], 2)
+        self.assertEqual(user["diagram_lk"]["nom"], 3)
+        self.assertEqual(user["diagram_lk"]["noa"], 3)
+        self.assertIn("username", user["attributes"])
+        self.assertIn("login", user["methods"])
+
 
 class EstimateMetricTests(unittest.TestCase):
     def test_calculates_effort_cost_duration(self):
@@ -247,6 +266,24 @@ class CliTests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertEqual(payload["summary"]["class_count"], 3)
 
+    def test_cli_test_path_auto_detects_oom_class_diagram_metric(self):
+        completed = subprocess.run(
+            [
+                str(ROOT / ".venv" / "Scripts" / "python.exe"),
+                str(ROOT / "backend" / "cli.py"),
+                "test",
+                "path",
+                str(ROOT / "samples" / "class_diagram_demo.oom"),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=ROOT,
+        )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["summary"]["class_count"], 4)
+        self.assertEqual(payload["summary"]["relation_count"], 3)
+
     def test_cli_help_supports_english_catalog(self):
         completed = subprocess.run(
             [str(ROOT / ".venv" / "Scripts" / "python.exe"), str(ROOT / "backend" / "cli.py"), "-L", "en", "--help"],
@@ -294,7 +331,7 @@ class CliTests(unittest.TestCase):
             cwd=ROOT,
         )
         payload = json.loads(completed.stdout)
-        self.assertEqual(payload["summary"]["class_count"], 1)
+        self.assertEqual(payload["summary"]["class_count"], 2)
 
 
 if __name__ == "__main__":

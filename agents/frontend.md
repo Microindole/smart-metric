@@ -28,15 +28,19 @@ frontend/pages/cfg-metric.vue
 frontend/pages/oo-metric.vue
 frontend/pages/project-metric.vue
 frontend/pages/ai-review.vue
-frontend/pages/estimate-metric.vue
 frontend/pages/report-export.vue
 ```
 
 `report-export.vue` 当前支持从前端本地已保存的度量结果自动汇总，并可勾选参与汇总的模块，不再要求手工编写完整 JSON。
 
+`cfg-metric.vue` 当前支持在分析或导入后直接展示控制流图预览：页面使用后端返回的 `nodes` 和 `edges` 绘制内联 SVG，并保留 Mermaid 源码作为可复制文本。导入图如果带有 `type=decision/branch`，页面会分别画成菱形和侧向分支节点；没有显式类型时，会根据出边数量推断判定点。不要只展示 Mermaid 文本，否则用户会误以为控制流图没有画出来。
+
 `project-metric.vue` 当前支持选择或输入项目目录路径，配置默认忽略、自定义忽略目录、自定义忽略通配规则，并调用后端项目扫描接口。
 同时支持自动读取项目根目录 `.smartmetricignore`，并展示实际生效的忽略规则。
 在本机开发环境下，可点击按钮通过系统目录选择框选择路径。
+项目扫描结果已拆成结果摘要组件和图表组件，不再只是空表格占位。
+切页后会保留项目目录、忽略配置和最近一次扫描结果。
+项目级扫描请求超时应高于普通接口；不要沿用全局 20 秒超时。
 
 `loc-metric.vue` 当前支持 Java/Python/C++ 的结构化结果展示：
 
@@ -44,6 +48,14 @@ frontend/pages/report-export.vue
 代码行分析结果会按文件显示 language/class_count/method_count/condition_count/loop_count
 抽象语法树分析结果（类级）支持显示 method_count/field_count/RFC/LCOM
 抽象语法树分析结果（方法级）不再只在 Java 文件有数据，Python/C++ 也会生成方法行
+```
+
+`function-point.vue` 当前支持：
+
+```text
+手动输入 EI/EO/EQ/ILF/EIF 和 14 个 GSC 因子
+点击“选择 FP JSON 并分析”读取本地 .json（如 samples/fp.json）
+导入后自动回填计数与因子，并直接触发一次 FP 计算
 ```
 
 `ai-review.vue` 当前支持：
@@ -59,7 +71,10 @@ frontend/pages/report-export.vue
 调用后端两阶段 AI 审查接口
 导出 AI 审查报告
 显示项目概览、重构顺序和重点文件结论
-使用页面内 CSS 条形图对发现严重级别和建议优先级做可视化，避免 Nuxt SSR 阶段直接挂载客户端图表运行时
+使用组件化 dashboard 展示 AI 审查结果，而不是把所有图和表堆在一个 vue 中
+使用 ECharts 展示 AI 审查总分、质量维度雷达、严重级别、建议优先级、改动范围、问题类别、重点文件命中、目标符号命中、预期收益分布
+切页后保持表单状态、loading 状态和审查结果
+提供手动“中断审查”按钮，而不是在路由切换时自动取消
 ```
 
 AI 审查页面请求约束：
@@ -68,6 +83,7 @@ AI 审查页面请求约束：
 真实 AI 审查是两阶段调用，Web 端请求超时应显著高于普通接口
 不要沿用全局 20 秒超时去调用 /api/metrics/ai-review/run
 若超时，应明确提示用户稍后重试或先用离线 fixture 验证
+切页时不要自动中断正在进行的 AI 审查
 ```
 
 目录路径说明：

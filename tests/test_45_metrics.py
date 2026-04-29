@@ -73,6 +73,26 @@ class Cfg45Tests(unittest.TestCase):
         self.assertGreaterEqual(by_language["java"]["cyclomatic_complexity"], 4)
         self.assertGreaterEqual(by_language["python"]["cyclomatic_complexity"], 4)
 
+    def test_cfg_complex_demo_sample(self):
+        sample = ROOT / "samples" / "cfg_complex_demo.py"
+        result = analyze_cfg_files([{"filename": sample.name, "content": sample.read_bytes()}])
+        item = result["files"][0]
+
+        self.assertEqual(item["analysis_method"], "ast-python")
+        self.assertEqual(item["decision_points"], 11)
+        self.assertEqual(item["cyclomatic_complexity"], 12)
+        self.assertEqual(item["formula_complexity"], 12)
+
+    def test_cfg_graph_uses_join_for_non_loop_branches(self):
+        source = b"def f(x):\n    if x > 0:\n        return x\n    return 0\n"
+        result = analyze_cfg_files([{"filename": "demo.py", "content": source}])
+        item = result["files"][0]
+        if_node = next(node for node in item["nodes"] if node["label"] == "if line 2")
+
+        self.assertTrue(any(edge["from"] == if_node["id"] and edge["label"] == "true" for edge in item["edges"]))
+        self.assertTrue(any(edge["from"] == if_node["id"] and edge["label"] == "false" for edge in item["edges"]))
+        self.assertFalse(any(edge["to"] == if_node["id"] and edge["label"] in {"join", "loop"} for edge in item["edges"]))
+
     def test_imports_json_graph(self):
         content = b'{"nodes":["start","if1","end"],"edges":[["start","if1"],["if1","end"]]}'
         result = analyze_imported_graph(content, "demo.json")
@@ -81,6 +101,18 @@ class Cfg45Tests(unittest.TestCase):
         self.assertEqual(result["node_count"], 3)
         self.assertEqual(result["edge_count"], 2)
         self.assertEqual(result["cyclomatic_complexity"], 1)
+
+    def test_imports_login_flow_demo_graph(self):
+        sample = ROOT / "samples" / "cfg_login_flow.json"
+        result = analyze_imported_graph(sample.read_bytes(), sample.name)
+
+        self.assertEqual(result["format"], "json")
+        self.assertEqual(result["node_count"], 14)
+        self.assertEqual(result["edge_count"], 17)
+        self.assertEqual(result["connected_components"], 1)
+        self.assertEqual(result["cyclomatic_complexity"], 5)
+        self.assertIn({"id": "n03_validate_input", "label": "Input valid?", "type": "decision"}, result["nodes"])
+        self.assertIn({"from": "n03_validate_input", "to": "n04_show_validation_error", "label": "invalid"}, result["edges"])
 
     def test_imports_mermaid_graph(self):
         content = b"flowchart TD\n  start --> if1\n  if1 --> end\n"

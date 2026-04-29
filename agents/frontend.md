@@ -33,6 +33,8 @@ frontend/pages/report-export.vue
 
 `report-export.vue` 当前支持从前端本地已保存的度量结果自动汇总，并可勾选参与汇总的模块，不再要求手工编写完整 JSON。
 
+`cfg-metric.vue` 当前支持在分析或导入后直接展示控制流图预览：页面使用后端返回的 `nodes` 和 `edges` 绘制内联 SVG，并保留 Mermaid 源码作为可复制文本。导入图如果带有 `type=decision/branch`，页面会分别画成菱形和侧向分支节点；没有显式类型时，会根据出边数量推断判定点。不要只展示 Mermaid 文本，否则用户会误以为控制流图没有画出来。
+
 `project-metric.vue` 当前支持选择或输入项目目录路径，配置默认忽略、自定义忽略目录、自定义忽略通配规则，并调用后端项目扫描接口。
 同时支持自动读取项目根目录 `.smartmetricignore`，并展示实际生效的忽略规则。
 在本机开发环境下，可点击按钮通过系统目录选择框选择路径。

@@ -11,13 +11,19 @@ def analyze_imported_graph(content: bytes, filename: str) -> Dict:
     text = _decode_bytes(content)
     fmt = detect_graph_format(filename, text)
     if fmt == "json":
-        nodes, edges = parse_json_graph(text)
+        nodes, edges, node_meta, edge_labels = parse_json_graph(text)
     elif fmt == "mermaid":
         nodes, edges = parse_mermaid_graph(text)
+        node_meta = {}
+        edge_labels = {}
     elif fmt == "dot":
         nodes, edges = parse_dot_graph(text)
+        node_meta = {}
+        edge_labels = {}
     elif fmt == "xml":
         nodes, edges = parse_xml_graph(text)
+        node_meta = {}
+        edge_labels = {}
     else:
         raise ValueError(f"暂不支持的控制流图格式: {filename}")
 
@@ -35,9 +41,9 @@ def analyze_imported_graph(content: bytes, filename: str) -> Dict:
         "edge_count": edge_count,
         "connected_components": components,
         "cyclomatic_complexity": complexity,
-        "nodes": [{"id": node} for node in nodes],
-        "edges": [{"from": src, "to": dst} for src, dst in normalized_edges],
-        "mermaid": build_mermaid(nodes, normalized_edges),
+        "nodes": [build_node_payload(node, node_meta.get(node, {})) for node in nodes],
+        "edges": [build_edge_payload(src, dst, edge_labels.get((src, dst), "")) for src, dst in normalized_edges],
+        "mermaid": build_mermaid(nodes, normalized_edges, edge_labels),
     }
 
 
@@ -55,25 +61,38 @@ def detect_graph_format(filename: str, text: str) -> str:
     return ""
 
 
-def parse_json_graph(text: str) -> Tuple[Set[str], Set[Tuple[str, str]]]:
+def parse_json_graph(text: str) -> Tuple[Set[str], Set[Tuple[str, str]], Dict[str, Dict[str, str]], Dict[Tuple[str, str], str]]:
     payload = json.loads(text)
     raw_nodes = payload.get("nodes", [])
     raw_edges = payload.get("edges", [])
 
     nodes: Set[str] = set()
+    node_meta: Dict[str, Dict[str, str]] = {}
     for item in raw_nodes:
         if isinstance(item, str):
             nodes.add(item)
         elif isinstance(item, dict):
             node_id = item.get("id") or item.get("name") or item.get("label")
             if node_id:
-                nodes.add(str(node_id))
+                node_id = str(node_id)
+                nodes.add(node_id)
+                node_meta[node_id] = {
+                    key: str(value)
+                    for key, value in {
+                        "label": item.get("label") or item.get("name"),
+                        "type": item.get("type"),
+                    }.items()
+                    if value
+                }
 
     edges: Set[Tuple[str, str]] = set()
+    edge_labels: Dict[Tuple[str, str], str] = {}
     for item in raw_edges:
+        label = ""
         if isinstance(item, dict):
             src = item.get("from") or item.get("source") or item.get("src")
             dst = item.get("to") or item.get("target") or item.get("dst")
+            label = str(item.get("label") or item.get("condition") or "")
         elif isinstance(item, (list, tuple)) and len(item) >= 2:
             src, dst = item[0], item[1]
         else:
@@ -83,9 +102,28 @@ def parse_json_graph(text: str) -> Tuple[Set[str], Set[Tuple[str, str]]]:
         src_id = str(src)
         dst_id = str(dst)
         nodes.update([src_id, dst_id])
-        edges.add((src_id, dst_id))
+        edge = (src_id, dst_id)
+        edges.add(edge)
+        if label:
+            edge_labels[edge] = label
 
-    return nodes, edges
+    return nodes, edges, node_meta, edge_labels
+
+
+def build_node_payload(node_id: str, metadata: Dict[str, str]) -> Dict[str, str]:
+    payload = {"id": node_id}
+    if metadata.get("label"):
+        payload["label"] = metadata["label"]
+    if metadata.get("type"):
+        payload["type"] = metadata["type"]
+    return payload
+
+
+def build_edge_payload(src: str, dst: str, label: str = "") -> Dict[str, str]:
+    payload = {"from": src, "to": dst}
+    if label:
+        payload["label"] = label
+    return payload
 
 
 def parse_mermaid_graph(text: str) -> Tuple[Set[str], Set[Tuple[str, str]]]:
@@ -216,12 +254,17 @@ def connected_components(nodes: Iterable[str], edges: Iterable[Tuple[str, str]])
     return count
 
 
-def build_mermaid(nodes: List[str], edges: List[Tuple[str, str]]) -> str:
+def build_mermaid(nodes: List[str], edges: List[Tuple[str, str]], edge_labels: Dict[Tuple[str, str], str] | None = None) -> str:
+    edge_labels = edge_labels or {}
     lines = ["flowchart TD"]
     for node in nodes:
         lines.append(f'  {node}["{node}"]')
     for src, dst in edges:
-        lines.append(f"  {src} --> {dst}")
+        label = edge_labels.get((src, dst), "")
+        if label:
+            lines.append(f"  {src} -->|{label}| {dst}")
+        else:
+            lines.append(f"  {src} --> {dst}")
     return "\n".join(lines)
 
 

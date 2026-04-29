@@ -100,6 +100,18 @@ CStyleAnalyzer    -> C/C++，规则分析
 
 Java/Python AST 解析失败时会 fallback 到规则策略，接口不直接崩溃。
 
+Python 源码级 CFG 当前由标准库 AST 递归生成结构化控制流图：
+
+```text
+if / elif      -> true / false 分支后进入合流节点
+for / while    -> true 进入循环体，loop / continue 回到循环判定，false 退出循环
+try / except   -> except 作为异常分支判定点
+break / return -> 作为影响控制流的语句节点展示
+and / or / 三元表达式 -> 作为额外判定点计入圈复杂度
+```
+
+复杂度数值仍按判定点统计，并与 `V(G)=E-N+2P` 的接口字段保持一致。
+
 如果用户要求 AI 识别图片流程图，不要默认接入 AI。当前支持的是结构化图：
 
 ```text
@@ -108,6 +120,19 @@ Mermaid
 DOT
 OOM
 XML
+```
+
+JSON 导入图可使用两种节点写法：
+
+```text
+"nodes": ["start", "end"]
+"nodes": [{"id": "decision_1", "label": "Input valid?", "type": "decision"}]
+```
+
+JSON 边可使用数组或对象；对象边支持 `label`，前端会把导入图的 `type=decision` 画成菱形、`type=branch` 放到侧向分支位置。业务流程演示优先使用：
+
+```text
+samples/cfg_login_flow.json
 ```
 
 图片识别应作为扩展功能，需要单独说明准确性和依赖。

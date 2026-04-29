@@ -49,7 +49,9 @@ samples/SampleStudent.java
 samples/oo_demo.java
 samples/class_diagram_demo.xml
 samples/sample_script.py
+samples/cfg_complex_demo.py
 samples/cfg_demo.json
+samples/cfg_login_flow.json
 samples/report_demo.json
 samples/
 ```
@@ -234,10 +236,11 @@ class_count = 3
 源码级输入：
 
 ```text
-samples/sample_script.py
+基础样例：samples/sample_script.py
+复杂度演示样例：samples/cfg_complex_demo.py
 ```
 
-预期结果：
+基础样例预期结果：
 
 ```text
 file_count = 1
@@ -245,13 +248,30 @@ max_complexity = 1
 total_decision_points = 0
 ```
 
+复杂度演示样例预期结果：
+
+```text
+file_count = 1
+max_complexity = 12
+total_decision_points = 11
+```
+
 图文件输入：
 
 ```text
-samples/cfg_demo.json
+常见业务流程样例：samples/cfg_login_flow.json
+最小分支样例：samples/cfg_demo.json
 ```
 
-预期结果：
+常见业务流程样例预期结果：
+
+```text
+node_count = 14
+edge_count = 17
+cyclomatic_complexity = 5
+```
+
+最小分支样例预期结果：
 
 ```text
 node_count = 6

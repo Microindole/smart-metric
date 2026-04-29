@@ -53,6 +53,15 @@ Python -> 标准库 ast
 Java   -> javalang
 ```
 
+Python AST 策略不仅统计判定点，还会递归生成结构化控制流图：
+
+```text
+普通分支 -> true / false 后合流
+循环     -> true 进入循环体，loop / continue 回到循环判定，false 退出
+异常     -> except 作为异常分支判定
+break / return -> 作为控制流语句节点
+```
+
 继续使用规则策略的语言：
 
 ```text
@@ -82,3 +91,20 @@ nodes
 edges
 mermaid
 ```
+
+## 导入图 JSON 约定
+
+JSON 导入支持简写和带元数据两种节点形式：
+
+```json
+{"nodes":["start","end"],"edges":[["start","end"]]}
+```
+
+```json
+{
+  "nodes": [{"id": "n03_validate_input", "label": "Input valid?", "type": "decision"}],
+  "edges": [{"from": "n03_validate_input", "to": "n04_show_validation_error", "label": "invalid"}]
+}
+```
+
+前端会根据 `type` 优化展示：`decision` 为菱形，`branch` 为侧向分支节点。

@@ -38,12 +38,15 @@ scripts/run_backend_tests.py
 scripts/backend_smoke.py
 ```
 
-`tests.test_45_metrics` 包含 Java/Python 控制流 AST 策略断言：
+`tests.test_45_metrics` 包含 Java/Python 控制流 AST 策略断言，并固定校验 `samples/cfg_complex_demo.py` 的演示复杂度：
 
 ```text
 Java   -> ast-java-javalang
 Python -> ast-python
+cfg_complex_demo.py -> cyclomatic_complexity = 12
 ```
+
+其中 CFG 图形断言要求普通 `if` 分支不能画回自身，只有 `for/while/do` 循环允许出现回边。
 
 如果 `.venv` 不存在：
 
@@ -129,16 +132,30 @@ frontend/.nuxt/dist/server/server.mjs
 5. 结果区应显示 UFP/GSC 总分/VAF/FP，且无报错提示
 ```
 
+控制流图页面手动验证：
+
+```text
+1. 打开 /cfg-metric
+2. 上传 samples/sample_script.py 并点击开始分析
+3. 应看到 sample_script.py 的控制流图 SVG 预览，最小图为 Start -> End
+4. 下方仍应显示 Mermaid 源码
+5. 如需分支演示，上传 samples/cfg_complex_demo.py，预期圈复杂度为 12
+6. 如需导入图文件演示，优先导入 samples/cfg_login_flow.json，预期圈复杂度为 5
+7. 如需最小导入样例，导入 samples/cfg_demo.json
+```
+
 ## 样例文件
 
 ```text
 samples/sample_usecase.oom
 samples/SampleStudent.java
 samples/sample_script.py
+samples/cfg_complex_demo.py
 samples/sample_algo.cpp
 samples/oo_demo.java
 samples/class_diagram_demo.xml
 samples/cfg_demo.json
+samples/cfg_login_flow.json
 samples/cfg_demo.mmd
 samples/cfg_demo.dot
 samples/cfg_demo.oom

@@ -86,7 +86,6 @@ frontend/.nuxt/dist/server/server.mjs
 /project-metric
 /ai-review
 /oo-metric
-/estimate-metric
 /report-export
 ```
 
@@ -98,6 +97,16 @@ frontend/.nuxt/dist/server/server.mjs
 3. 应弹出系统目录选择框
 4. 选择目录后，输入框应回填绝对路径
 5. 取消选择时，页面应提示已取消，不应报错
+```
+
+项目扫描结果验证：
+
+```text
+1. /project-metric 页面在未扫描前应显示“选择项目目录并点击开始扫描后，这里会显示项目级结果”
+2. 扫描完成后应显示：项目目录、扫描模块、摘要统计
+3. 应显示项目扫描可视化图表，而不是只有空表格
+4. 切换到其它页面再返回 /project-metric 时，最近一次扫描结果应保留
+5. 扫描整个仓库时，Web 端不应因默认 20 秒超时报错
 ```
 
 报告导出页手动验证：
@@ -134,9 +143,13 @@ samples/estimate.json
 
 ```text
 docs/complete-test-case.md
+SHOW.md
 ```
 
-该用例覆盖 UCP、LoC、FP、OO、CFG、项目扫描、项目估算和报告导出，并记录页面操作、测试数据和预期数值。
+其中：
+
+- `docs/complete-test-case.md` 偏验收和预期数值
+- `SHOW.md` 偏课堂演示顺序、现场讲解和兜底方案
 
 样例使用约定（OO 源码分析）：
 

@@ -75,7 +75,6 @@ npm run start
 - `/cfg-metric`
 - `/project-metric`
 - `/ai-review`
-- `/estimate-metric`
 - `/report-export`
 
 ### 3. CLI 入口
@@ -103,7 +102,7 @@ python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
 python backend\cli.py tp samples\cfg_demo.json
 python backend\cli.py tb --suite unit
 python backend\cli.py ai-review D:\works\smart-metric -F json --phase1-file samples\ai_review_phase1.json --phase2-file samples\ai_review_phase2.json
-python backend\cli.py ai-review D:\works\smart-metric -F pdf -P samples\fp.json -E samples\estimate.json
+python backend\cli.py ai-review D:\works\smart-metric -F pdf -P samples\fp.json
 python backend\cli.py project-scan D:\works\smart-metric
 python backend\cli.py project-report D:\works\smart-metric -F pdf
 python backend\cli.py project-scan D:\works\smart-metric --ignore-dir coverage --ignore-glob *.generated.py
@@ -127,7 +126,7 @@ python backend\cli.py oos samples\oo_demo.java
 python backend\cli.py cfg samples\cfg_demo.json
 python backend\cli.py ai-review D:\works\smart-metric -F pdf -o ai-review.pdf --phase1-file samples\ai_review_phase1.json --phase2-file samples\ai_review_phase2.json
 python backend\cli.py project-scan D:\works\smart-metric --modules inventory,loc,dependency,oo,design
-python backend\cli.py project-report D:\works\smart-metric -F pdf -o smartmetric-report.pdf -P fp.json -E estimate.json
+python backend\cli.py project-report D:\works\smart-metric -F pdf -o smartmetric-report.pdf -P fp.json
 python backend\cli.py report samples\report_demo.json --format markdown
 python backend\cli.py report samples\report_demo.json --format pdf
 ```

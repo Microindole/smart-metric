@@ -29,18 +29,19 @@
         </div>
       </a-card>
 
-      <a-card title="扫描摘要" class="panel-card">
-        <a-row :gutter="12">
-          <a-col :span="6"><a-statistic title="总文件数" :value="summary.total_files" /></a-col>
-          <a-col :span="6"><a-statistic title="代码文件数" :value="summary.code_file_count" /></a-col>
-          <a-col :span="6"><a-statistic title="设计文件数" :value="summary.design_file_count" /></a-col>
-          <a-col :span="6"><a-statistic title="总代码行" :value="summary.code_lines" /></a-col>
-          <a-col :span="6"><a-statistic title="依赖边数" :value="summary.dependency_edge_count" /></a-col>
-          <a-col :span="6"><a-statistic title="类总数" :value="summary.class_count" /></a-col>
-          <a-col :span="6"><a-statistic title="上帝文件" :value="summary.god_files" /></a-col>
-          <a-col :span="6"><a-statistic title="上帝类" :value="summary.god_classes" /></a-col>
-        </a-row>
-      </a-card>
+      <ProjectSummaryPanel
+        :has-result="hasResult"
+        :root-path="rootPath"
+        :modules="modules"
+        :summary="summary"
+      />
+
+      <ProjectChartsPanel
+        :has-result="hasResult"
+        :language-rows="languageRows"
+        :god-file-rows="godFileRows"
+        :summary="summary"
+      />
 
       <a-card title="忽略配置" class="panel-card">
         <div class="effective-line">默认忽略：{{ scanOptions.use_default_ignores ? '开启' : '关闭' }}</div>
@@ -73,45 +74,51 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed } from 'vue'
 import { message } from 'ant-design-vue'
 import AppLayout from '~/components/AppLayout.vue'
+import ProjectChartsPanel from '~/components/project-metric/ProjectChartsPanel.vue'
+import ProjectSummaryPanel from '~/components/project-metric/ProjectSummaryPanel.vue'
+import { useProjectMetricState } from '~/composables/useProjectMetricState'
 import api from '~/utils/api'
 import { saveMetricSnapshot } from '~/utils/reportDraft'
 
-const loading = ref(false)
-const pickingDirectory = ref(false)
-const projectPath = ref('')
-const useDefaultIgnores = ref(true)
-const useIgnoreFile = ref(true)
-const ignoreFileName = ref('.smartmetricignore')
-const modules = ref(['inventory', 'loc', 'dependency', 'oo', 'design'])
-const ignoreDirsText = ref('')
-const ignoreGlobsText = ref('')
-const result = ref(null)
-const summary = reactive({
-  total_files: 0,
-  code_file_count: 0,
-  design_file_count: 0,
-  code_lines: 0,
-  dependency_edge_count: 0,
-  class_count: 0,
-  god_files: 0,
-  god_classes: 0,
+const { state } = useProjectMetricState()
+const loading = computed(() => state.loading)
+const pickingDirectory = computed(() => state.pickingDirectory)
+const projectPath = computed({
+  get: () => state.projectPath,
+  set: (value) => { state.projectPath = value },
 })
-const scanOptions = reactive({
-  use_default_ignores: true,
-  use_ignore_file: true,
-  ignore_file_path: '',
-  ignore_file_found: false,
-  ignore_file_has_negation: false,
-  ignore_file_dirs: [],
-  ignore_file_globs: [],
-  ignore_dirs: [],
-  ignore_globs: [],
-  effective_ignore_dirs: [],
-  effective_ignore_globs: [],
+const useDefaultIgnores = computed({
+  get: () => state.useDefaultIgnores,
+  set: (value) => { state.useDefaultIgnores = value },
 })
+const useIgnoreFile = computed({
+  get: () => state.useIgnoreFile,
+  set: (value) => { state.useIgnoreFile = value },
+})
+const ignoreFileName = computed({
+  get: () => state.ignoreFileName,
+  set: (value) => { state.ignoreFileName = value },
+})
+const modules = computed({
+  get: () => state.modules,
+  set: (value) => { state.modules = value },
+})
+const ignoreDirsText = computed({
+  get: () => state.ignoreDirsText,
+  set: (value) => { state.ignoreDirsText = value },
+})
+const ignoreGlobsText = computed({
+  get: () => state.ignoreGlobsText,
+  set: (value) => { state.ignoreGlobsText = value },
+})
+const result = computed(() => state.result)
+const summary = computed(() => state.summary)
+const scanOptions = computed(() => state.scanOptions)
+const hasResult = computed(() => Boolean(state.result))
+const rootPath = computed(() => state.result?.root || state.projectPath)
 
 const moduleOptions = [
   { label: '资产清点', value: 'inventory' },
@@ -162,11 +169,11 @@ const languageColumns = [
   { title: '文件数', dataIndex: 'count', key: 'count', width: 120 },
 ]
 
-const locRows = computed(() => result.value?.loc?.files || [])
-const godFileRows = computed(() => result.value?.oo?.god_files || [])
-const godClassRows = computed(() => (result.value?.oo?.god_classes || []).map((item, index) => ({ ...item, rowKey: `${item.filename}-${item.class_name}-${index}` })))
+const locRows = computed(() => state.result?.loc?.files || [])
+const godFileRows = computed(() => state.result?.oo?.god_files || [])
+const godClassRows = computed(() => (state.result?.oo?.god_classes || []).map((item, index) => ({ ...item, rowKey: `${item.filename}-${item.class_name}-${index}` })))
 const languageRows = computed(() => {
-  const breakdown = result.value?.summary?.language_breakdown || {}
+  const breakdown = state.result?.summary?.language_breakdown || {}
   return Object.entries(breakdown).map(([language, count]) => ({ language, count }))
 })
 
@@ -178,7 +185,7 @@ const scanProject = async () => {
     return
   }
 
-  loading.value = true
+  state.loading = true
   try {
     const payload = {
       path: projectPath.value.trim(),
@@ -190,9 +197,9 @@ const scanProject = async () => {
       ignore_globs: parseLines(ignoreGlobsText.value),
     }
 
-    const { data } = await api.post('/api/metrics/project/scan', payload)
-    result.value = data.data
-    Object.assign(summary, {
+    const { data } = await api.post('/api/metrics/project/scan', payload, { timeout: 300000 })
+    state.result = data.data
+    Object.assign(state.summary, {
       total_files: data.data.summary.total_files || 0,
       code_file_count: data.data.summary.code_file_count || 0,
       design_file_count: data.data.summary.design_file_count || 0,
@@ -202,7 +209,7 @@ const scanProject = async () => {
       god_files: data.data.summary.god_files || 0,
       god_classes: data.data.summary.god_classes || 0,
     })
-    Object.assign(scanOptions, data.data.scan_options || {
+    Object.assign(state.scanOptions, data.data.scan_options || {
       use_default_ignores: true,
       use_ignore_file: true,
       ignore_file_path: '',
@@ -234,9 +241,14 @@ const scanProject = async () => {
     })
     message.success('项目扫描完成')
   } catch (err) {
-    message.error(err?.response?.data?.message || '项目扫描失败')
+    const timeout = err?.code === 'ECONNABORTED'
+    message.error(
+      timeout
+        ? '项目扫描超时，请稍后重试。项目级扫描会比单文件度量慢很多。'
+        : (err?.response?.data?.message || '项目扫描失败')
+    )
   } finally {
-    loading.value = false
+    state.loading = false
   }
 }
 
@@ -251,7 +263,7 @@ const clearIgnoreInputs = () => {
 }
 
 const pickProjectDirectory = async () => {
-  pickingDirectory.value = true
+  state.pickingDirectory = true
   try {
     const { data } = await api.post('/api/system/pick-directory', {
       initial_directory: projectPath.value.trim() || 'D:\\works\\smart-metric',
@@ -267,7 +279,7 @@ const pickProjectDirectory = async () => {
       message.error(err?.response?.data?.message || '选择项目目录失败')
     }
   } finally {
-    pickingDirectory.value = false
+    state.pickingDirectory = false
   }
 }
 

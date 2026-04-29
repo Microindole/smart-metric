@@ -28,7 +28,6 @@ frontend/pages/cfg-metric.vue
 frontend/pages/oo-metric.vue
 frontend/pages/project-metric.vue
 frontend/pages/ai-review.vue
-frontend/pages/estimate-metric.vue
 frontend/pages/report-export.vue
 ```
 
@@ -37,6 +36,9 @@ frontend/pages/report-export.vue
 `project-metric.vue` 当前支持选择或输入项目目录路径，配置默认忽略、自定义忽略目录、自定义忽略通配规则，并调用后端项目扫描接口。
 同时支持自动读取项目根目录 `.smartmetricignore`，并展示实际生效的忽略规则。
 在本机开发环境下，可点击按钮通过系统目录选择框选择路径。
+项目扫描结果已拆成结果摘要组件和图表组件，不再只是空表格占位。
+切页后会保留项目目录、忽略配置和最近一次扫描结果。
+项目级扫描请求超时应高于普通接口；不要沿用全局 20 秒超时。
 
 `loc-metric.vue` 当前支持 Java/Python/C++ 的结构化结果展示：
 

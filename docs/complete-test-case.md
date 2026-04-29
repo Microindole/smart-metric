@@ -16,7 +16,6 @@ SM-E2E-001
 - 面向对象度量 OO / CK / LK
 - 控制流图与圈复杂度 CFG
 - 项目扫描
-- 项目估算
 - 报告导出
 
 ## 前置条件
@@ -296,14 +295,6 @@ god_files = 0
 god_classes = 0
 ```
 
-### 8. 项目估算
-
-页面：
-
-```text
-/estimate-metric
-```
-
 输入：
 
 ```text
@@ -434,7 +425,6 @@ $routes = @(
   '/oo-metric',
   '/cfg-metric',
   '/project-metric',
-  '/estimate-metric',
   '/report-export'
 )
 
@@ -457,7 +447,6 @@ foreach ($route in $routes) {
 - 五个核心度量页面均能计算并显示结果。
 - 样例文件上传后结果与本文档预期一致。
 - 项目扫描能识别样例目录中的代码文件、设计文件和图文件。
-- 估算器能基于 FP 结果生成工作量、成本和工期。
 - 报告导出能汇总已保存结果并生成 Markdown、HTML、PDF。
 - 自动化测试 `48 tests OK`。
 - 前端全部路由返回 200。

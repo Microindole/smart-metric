@@ -110,6 +110,16 @@ frontend/.nuxt/dist/server/server.mjs
 5. 导出 markdown/html/pdf
 ```
 
+功能点页 JSON 导入验证：
+
+```text
+1. 打开 /function-point
+2. 点击“选择 FP JSON 并分析”
+3. 选择 samples/fp.json
+4. 页面应自动回填功能点计数与 GSC 因子并完成计算
+5. 结果区应显示 UFP/GSC 总分/VAF/FP，且无报错提示
+```
+
 ## 样例文件
 
 ```text

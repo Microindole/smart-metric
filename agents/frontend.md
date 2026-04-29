@@ -46,6 +46,14 @@ frontend/pages/report-export.vue
 抽象语法树分析结果（方法级）不再只在 Java 文件有数据，Python/C++ 也会生成方法行
 ```
 
+`function-point.vue` 当前支持：
+
+```text
+手动输入 EI/EO/EQ/ILF/EIF 和 14 个 GSC 因子
+点击“选择 FP JSON 并分析”读取本地 .json（如 samples/fp.json）
+导入后自动回填计数与因子，并直接触发一次 FP 计算
+```
+
 `ai-review.vue` 当前支持：
 
 ```text

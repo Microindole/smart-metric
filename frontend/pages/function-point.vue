@@ -24,9 +24,17 @@
       <a-card>
         <a-space>
           <a-button type="primary" :loading="loading" @click="calculate">计算 FP</a-button>
+          <a-button @click="openFpFilePicker">选择 FP JSON 并分析</a-button>
           <a-button @click="loadDefaults">重置因子</a-button>
           <a-button @click="exportResult">导出 CSV</a-button>
         </a-space>
+        <input
+          ref="fpFileInput"
+          type="file"
+          accept=".json,application/json"
+          style="display: none"
+          @change="onFpFileSelected"
+        />
       </a-card>
 
       <a-card title="计算结果">
@@ -53,6 +61,7 @@ import api from '~/utils/api'
 import { saveMetricSnapshot } from '~/utils/reportDraft'
 
 const loading = ref(false)
+const fpFileInput = ref(null)
 const countRows = reactive([
   { type: 'EI', name: '外部输入', simple: 0, average: 0, complex: 0 },
   { type: 'EO', name: '外部输出', simple: 0, average: 0, complex: 0 },
@@ -80,6 +89,64 @@ const detailColumns = [
   { title: '说明', dataIndex: 'name', key: 'name' },
   { title: '小计', dataIndex: 'subtotal', key: 'subtotal', width: 120 },
 ]
+
+const normalizeLevel = (value) => {
+  const numeric = Number(value)
+  if (Number.isNaN(numeric)) {
+    return 0
+  }
+  return Math.min(5, Math.max(0, Math.round(numeric)))
+}
+
+const normalizeCount = (value) => {
+  const numeric = Number(value)
+  if (Number.isNaN(numeric)) {
+    return 0
+  }
+  return Math.max(0, Math.round(numeric))
+}
+
+const openFpFilePicker = () => {
+  fpFileInput.value?.click()
+}
+
+const applyFpPayload = (payload) => {
+  const counts = payload?.counts || {}
+  countRows.forEach((row) => {
+    const source = counts[row.type] || {}
+    row.simple = normalizeCount(source.simple)
+    row.average = normalizeCount(source.average)
+    row.complex = normalizeCount(source.complex)
+  })
+
+  if (Array.isArray(payload?.gsc_factors) && payload.gsc_factors.length) {
+    gscFactors.value = payload.gsc_factors.map((factor, index) => ({
+      ...(gscFactors.value[index] || {}),
+      ...factor,
+      level: normalizeLevel(factor?.level),
+    }))
+  }
+}
+
+const onFpFileSelected = async (event) => {
+  const file = event?.target?.files?.[0]
+  event.target.value = ''
+  if (!file) {
+    return
+  }
+
+  try {
+    const text = await file.text()
+    const payload = JSON.parse(text)
+    if (!payload || typeof payload !== 'object') {
+      throw new Error('INVALID_PAYLOAD')
+    }
+    applyFpPayload(payload)
+    await calculate()
+  } catch (err) {
+    message.error('JSON 文件解析失败，请检查 fp.json 格式')
+  }
+}
 
 const loadDefaults = async () => {
   try {

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<o:Root xmlns:o="urn:smartmetric:oom">
+  <o:Class Id="BaseEntity" Name="BaseEntity">
+    <o:Attribute Name="id" />
+    <o:Operation Name="getId" />
+  </o:Class>
+  <o:Class Id="User" Name="User">
+    <o:Attribute Name="username" />
+    <o:Attribute Name="passwordHash" />
+    <o:Attribute Name="status" />
+    <o:Operation Name="login" />
+    <o:Operation Name="lock" />
+    <o:Operation Name="isActive" />
+  </o:Class>
+  <o:Class Id="Order" Name="Order">
+    <o:Attribute Name="total" />
+    <o:Attribute Name="status" />
+    <o:Operation Name="submit" />
+    <o:Operation Name="cancel" />
+  </o:Class>
+  <o:Class Id="Payment" Name="Payment">
+    <o:Attribute Name="amount" />
+    <o:Operation Name="pay" />
+    <o:Operation Name="refund" />
+  </o:Class>
+  <o:Generalization Source="User" Target="BaseEntity" />
+  <o:Association Source="User" Target="Order" />
+  <o:Association Source="Order" Target="Payment" />
+</o:Root>

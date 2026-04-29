@@ -181,6 +181,13 @@ backend/core/class_diagram_metric/
 .oom
 ```
 
+内置类图演示样例：
+
+```text
+samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
+```
+
 输出：
 
 ```text

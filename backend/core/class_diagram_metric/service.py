@@ -57,7 +57,8 @@ def analyze_class_diagram_bytes(filename: str, content: bytes) -> Dict:
             continue
         for child in node:
             child_tag = local_name(child.tag)
-            child_name = (child.attrib.get("name") or child.attrib.get("id") or "").strip()
+            child_attrs = {k.lower(): v for k, v in child.attrib.items()}
+            child_name = (child_attrs.get("name") or child_attrs.get("id") or "").strip()
             if "attribute" in child_tag or "property" in child_tag:
                 classes[node_id]["attributes"].add(child_name or f"attr_{id(child)}")
             elif "operation" in child_tag or "method" in child_tag:

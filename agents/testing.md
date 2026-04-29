@@ -154,6 +154,7 @@ samples/cfg_complex_demo.py
 samples/sample_algo.cpp
 samples/oo_demo.java
 samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
 samples/cfg_demo.json
 samples/cfg_login_flow.json
 samples/cfg_demo.mmd
@@ -202,6 +203,7 @@ python backend/cli.py serve --host 127.0.0.1 --port 5000
 python backend/cli.py oo-source samples/oo_demo.java
 python backend/cli.py oo-source --language python samples/sample_script.py
 python backend/cli.py oo-diagram samples/class_diagram_demo.xml
+python backend/cli.py oo-diagram samples/class_diagram_demo.oom
 python backend/cli.py cfg-graph samples/cfg_demo.json
 python backend/cli.py cfg-graph samples/cfg_demo.oom
 python backend/cli.py project-scan D:\works\smart-metric

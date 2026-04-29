@@ -97,6 +97,7 @@ python backend\cli.py test backend --suite all --start-server
 
 ```powershell
 python backend\cli.py test path samples\class_diagram_demo.xml
+python backend\cli.py test path samples\class_diagram_demo.oom
 python backend\cli.py test path samples\cfg_demo.json
 python backend\cli.py test path tests\estimate_cli_input.json --metric estimate
 python backend\cli.py tp samples\cfg_demo.json
@@ -121,6 +122,7 @@ CLI 计算示例：
 ```powershell
 python backend\cli.py oo-source samples\oo_demo.java
 python backend\cli.py oo-diagram samples\class_diagram_demo.xml
+python backend\cli.py oo-diagram samples\class_diagram_demo.oom
 python backend\cli.py cfg-graph samples\cfg_demo.json
 python backend\cli.py oos samples\oo_demo.java
 python backend\cli.py cfg samples\cfg_demo.json
@@ -208,6 +210,7 @@ AI 审查：
 - `sample_algo.cpp`
 - `oo_demo.java`
 - `class_diagram_demo.xml`
+- `class_diagram_demo.oom`
 - `cfg_demo.json`
 - `cfg_demo.mmd`
 - `cfg_demo.dot`

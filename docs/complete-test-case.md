@@ -48,6 +48,7 @@ http://127.0.0.1:3000/
 samples/SampleStudent.java
 samples/oo_demo.java
 samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
 samples/sample_script.py
 samples/cfg_complex_demo.py
 samples/cfg_demo.json
@@ -217,12 +218,14 @@ max_cbo = 2
 
 ```text
 samples/class_diagram_demo.xml
+samples/class_diagram_demo.oom
 ```
 
 预期：
 
 ```text
-class_count = 3
+class_diagram_demo.xml -> class_count = 3
+class_diagram_demo.oom -> class_count = 4, relation_count = 3
 ```
 
 ### 6. 控制流图度量 CFG

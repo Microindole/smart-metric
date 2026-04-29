@@ -292,6 +292,15 @@ avg_method_complexity
 backend/core/class_diagram_metric/
 ```
 
+类图解析约定：
+
+```text
+支持 .xml / .oom 文件
+支持嵌套在 class 节点下的 Attribute / Operation
+解析属性名时应兼容 name / Name 等大小写差异
+演示样例包含 samples/class_diagram_demo.xml 和 samples/class_diagram_demo.oom
+```
+
 源码级策略位置：
 
 ```text

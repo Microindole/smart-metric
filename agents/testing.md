@@ -184,8 +184,11 @@ AI 审查离线验证：
 5. Web 页面可直接进入 /ai-review，检查配置状态和离线示例是否可用
 6. 建议详情区域应能看到 evidence / target_symbols / refactor_steps
 7. 审查结论区域应显示 project_overview / overall_priority / refactor_order
-8. 结果可视化区域应显示 ECharts 图表，而不是空白占位
-9. 真实 AI 模式下，Web 端不应因默认 20 秒超时报错
+8. 结果可视化区域应显示组件化 dashboard，而不是单页堆叠图表
+9. 图表至少应包含：AI 审查总分、质量维度雷达、严重级别、优先级、改动范围、问题类别、重点文件命中、目标符号命中、预期收益分布
+10. 真实 AI 模式下，Web 端不应因默认 20 秒超时报错
+11. 切换到其它页面再返回 /ai-review 时，loading 和结果状态应保持
+12. 手动点击“中断审查”后，页面应提示已取消
 ```
 
 CLI 帮助显示约定：
